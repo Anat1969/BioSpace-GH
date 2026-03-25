@@ -281,6 +281,279 @@ function TimerCard() {
   );
 }
 
+// ─── 4. ROI Calculator ─────────────────────────────────────────────────────
+function ROICard() {
+  const [employees, setEmployees] = useState(100);
+  const [result, setResult] = useState(null);
+
+  const handleCalc = () => {
+    const avgSickDaysPerYear = 8;
+    const avgDailyCostPerEmployee = 650; // ₪
+    const reduction = 0.18;
+    const savedDays = Math.round(employees * avgSickDaysPerYear * reduction);
+    const savedCost = (savedDays * avgDailyCostPerEmployee).toLocaleString("he-IL");
+    setResult({ savedDays, savedCost });
+  };
+
+  return (
+    <div className="relative overflow-hidden rounded-sm p-8 md:p-10 h-full border border-border/60 bg-gradient-to-br from-card via-card to-secondary/30 hover:border-primary/30 transition-all duration-700">
+      <div className="mb-6 text-3xl">💼</div>
+      <h3 className="font-frank text-xl md:text-2xl font-bold text-foreground mb-3">מחשבון חיסכון כלכלי</h3>
+      <p className="font-heebo text-sm text-muted-foreground leading-relaxed mb-6">
+        18% פחות ימי מחלה בסביבת עבודה עם אור יום תקין — מה זה שווה לארגון שלך?
+      </p>
+
+      <div className="mb-4">
+        <label className="text-xs text-muted-foreground font-heebo block mb-2">מספר עובדים</label>
+        <input
+          type="number"
+          min="1"
+          value={employees}
+          onChange={e => { setEmployees(Number(e.target.value)); setResult(null); }}
+          className="w-full bg-background/60 border border-border/60 rounded-sm px-4 py-2.5 text-foreground font-heebo text-sm focus:outline-none focus:border-primary/50 transition-colors"
+        />
+      </div>
+
+      <button
+        onClick={handleCalc}
+        className="bg-primary text-primary-foreground font-heebo font-medium px-6 py-2.5 rounded-sm text-sm hover:bg-primary/85 transition-all duration-300 mb-5"
+      >
+        חשב כדאיות תאורה טבעית
+      </button>
+
+      <AnimatePresence>
+        {result && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
+            className="rounded-sm border border-primary/30 bg-primary/5 p-5 space-y-3"
+          >
+            <div className="flex justify-between items-center">
+              <span className="text-xs text-muted-foreground font-heebo">ימי מחלה שנחסכים בשנה</span>
+              <span className="font-frank text-2xl font-bold text-primary">{result.savedDays}</span>
+            </div>
+            <div className="h-[1px] bg-border/50" />
+            <div className="flex justify-between items-center">
+              <span className="text-xs text-muted-foreground font-heebo">חיסכון כספי משוער לשנה</span>
+              <span className="font-frank text-2xl font-bold text-primary">₪{result.savedCost}</span>
+            </div>
+            <p className="text-[10px] text-muted-foreground font-heebo pt-1">
+              * מחושב לפי 8 ימי מחלה ממוצע לעובד × ₪650 עלות יומית × 18% הפחתה (מחקר אור יום)
+            </p>
+          </motion.div>
+        )}
+      </AnimatePresence>
+      <div className="absolute bottom-0 left-0 w-full h-[2px] bg-gradient-to-r from-primary/0 via-primary/30 to-primary/0" />
+    </div>
+  );
+}
+
+// ─── 5. Demographic Vulnerability Map ───────────────────────────────────────
+const DEMO_DATA = {
+  male:   { label: "גבר",  cortisol: 38, color: "text-amber-400",   bar: "bg-amber-500",   desc: "רמת קורטיזול בסיסית מוגברת בסביבה נטולת ירוק." },
+  female: { label: "אישה", cortisol: 74, color: "text-red-400",     bar: "bg-red-500",     desc: "נשים מציגות תגובת HPA מוגברת משמעותית באותה סביבה." },
+};
+
+function DemographicCard() {
+  const [gender, setGender] = useState("male");
+  const data = DEMO_DATA[gender];
+
+  return (
+    <div className="relative overflow-hidden rounded-sm p-8 md:p-10 h-full border border-border/60 bg-gradient-to-br from-card via-card to-secondary/30 hover:border-primary/30 transition-all duration-700">
+      <div className="mb-6 text-3xl">🗺️</div>
+      <h3 className="font-frank text-xl md:text-2xl font-bold text-foreground mb-3">סימולטור פגיעות דמוגרפית</h3>
+      <p className="font-heebo text-sm text-muted-foreground leading-relaxed mb-2">
+        שכונה דלת ירוק — מי הגוף שסובל יותר?
+      </p>
+      <p className="font-heebo text-xs text-muted-foreground/60 italic mb-6">
+        מחקרה של ד&quot;ר ג&apos;ני רואי
+      </p>
+
+      {/* Toggle */}
+      <div className="flex items-center gap-3 mb-6 text-sm font-heebo">
+        {["male", "female"].map(g => (
+          <button
+            key={g}
+            onClick={() => setGender(g)}
+            className={`px-5 py-2 rounded-sm border text-sm font-medium transition-all duration-300 ${
+              gender === g
+                ? "border-primary/60 bg-primary/10 text-primary"
+                : "border-border/40 text-muted-foreground hover:border-border"
+            }`}
+          >
+            {DEMO_DATA[g].label}
+          </button>
+        ))}
+      </div>
+
+      {/* Cortisol bar */}
+      <div className="mb-3">
+        <div className="flex justify-between items-center mb-2">
+          <span className="text-xs text-muted-foreground font-heebo">קורטיזול בסיסי מדומה</span>
+          <motion.span
+            key={data.cortisol}
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+            className={`font-frank text-xl font-bold ${data.color}`}
+          >
+            {data.cortisol} nmol/L
+          </motion.span>
+        </div>
+        <div className="h-2 w-full bg-border/40 rounded-full overflow-hidden">
+          <motion.div
+            animate={{ width: `${data.cortisol}%` }}
+            transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
+            className={`h-full rounded-full ${data.bar}`}
+          />
+        </div>
+      </div>
+
+      <AnimatePresence mode="wait">
+        <motion.p
+          key={gender}
+          initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
+          className={`text-xs font-heebo leading-relaxed mb-4 ${data.color}`}
+        >
+          {data.desc}
+        </motion.p>
+      </AnimatePresence>
+
+      <div className="rounded-sm border border-border/40 bg-background/40 p-4">
+        <p className="text-xs text-muted-foreground font-heebo leading-relaxed">
+          נשים בשכונות דלות בטבע מציגות רמות קורטיזול גבוהות משמעותית.
+          <span className="text-foreground/70"> המרחב אינו ניטרלי.</span>
+        </p>
+      </div>
+      <div className="absolute bottom-0 left-0 w-full h-[2px] bg-gradient-to-r from-red-500/0 via-red-500/20 to-red-500/0" />
+    </div>
+  );
+}
+
+// ─── 6. Brain Architecture Timeline ────────────────────────────────────────
+const TIMELINE_LABELS = ["4 דקות", "שעה", "יום", "שבוע", "חודש", "שנה", "שנים"];
+const PHASES = {
+  biophilic: [
+    "מערכת העצבים הפאראסימפתטית מופעלת.",
+    "קורטיזול יורד. קצב לב מתייצב.",
+    "מצב רוח ויצירתיות משתפרים.",
+    "שינה עמוקה ואיכותית יותר.",
+    "ביצועים קוגניטיביים בשיא.",
+    "עמידות לסטרס גבוהה.",
+    "✓ ארכיטקטורה מוחית מחוזקת. היפוקמפוס שגשג.",
+  ],
+  windowless: [
+    "HPA axis מופעל. קורטיזול עולה.",
+    "מתח מצטבר. ריכוז יורד.",
+    "עייפות כרונית. מערכת חיסון נחלשת.",
+    "הפרעות שינה. חרדה גוברת.",
+    "דכאון מתפתח. ביצועים בירידה חדה.",
+    "נזק מוחי מתחיל. גלוקוקורטיקואידים מצטברים.",
+    null, // triggers severe warning
+  ],
+};
+
+function BrainTimelineCard() {
+  const [sliderVal, setSliderVal] = useState(0);
+  const [envType, setEnvType] = useState("biophilic");
+
+  const isSevere = envType === "windowless" && sliderVal === 6;
+  const phase = PHASES[envType][sliderVal];
+
+  return (
+    <div className={`relative overflow-hidden rounded-sm p-8 md:p-10 col-span-1 md:col-span-2 border transition-all duration-700 bg-gradient-to-br from-card via-card to-secondary/30 ${
+      isSevere ? "border-red-800/60" : "border-border/60 hover:border-primary/30"
+    }`}>
+      {/* Severe warning glow */}
+      {isSevere && (
+        <div className="absolute inset-0 bg-gradient-to-br from-red-950/40 via-background to-amber-950/30 pointer-events-none" />
+      )}
+
+      <div className="relative z-10">
+        <div className="mb-6 text-3xl">🧠</div>
+        <h3 className="font-frank text-xl md:text-2xl font-bold text-foreground mb-3">ציר זמן חשיפה כרונית</h3>
+        <p className="font-heebo text-sm text-muted-foreground leading-relaxed mb-6">
+          מה קורה למוח לאורך זמן — בסביבה ביופילית לעומת חדר ללא חלונות?
+        </p>
+
+        {/* Env toggle */}
+        <div className="flex items-center gap-3 mb-8 text-sm font-heebo">
+          {[("biophilic"), ("windowless")].map(e => (
+            <button
+              key={e}
+              onClick={() => setEnvType(e)}
+              className={`px-5 py-2 rounded-sm border text-sm font-medium transition-all duration-300 ${
+                envType === e
+                  ? e === "biophilic"
+                    ? "border-emerald-600/60 bg-emerald-500/10 text-emerald-400"
+                    : "border-red-700/60 bg-red-500/10 text-red-400"
+                  : "border-border/40 text-muted-foreground hover:border-border"
+              }`}
+            >
+              {e === "biophilic" ? "ביופילי" : "חדר ללא חלונות"}
+            </button>
+          ))}
+        </div>
+
+        {/* Slider */}
+        <div className="mb-4">
+          <div className="flex justify-between text-[10px] text-muted-foreground font-heebo mb-2">
+            {TIMELINE_LABELS.map(l => <span key={l}>{l}</span>)}
+          </div>
+          <input
+            type="range" min="0" max="6" step="1"
+            value={sliderVal}
+            onChange={e => setSliderVal(Number(e.target.value))}
+            className="w-full accent-primary cursor-pointer"
+          />
+        </div>
+
+        {/* Phase display */}
+        <AnimatePresence mode="wait">
+          {isSevere ? (
+            <motion.div
+              key="severe"
+              initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
+              className="rounded-sm border border-red-800/60 bg-red-950/40 p-5"
+            >
+              <div className="flex items-center gap-2 mb-2">
+                <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
+                <span className="text-red-400 text-xs font-heebo font-bold tracking-wider">אזהרה קלינית</span>
+              </div>
+              <p className="font-frank text-base md:text-lg text-red-300 leading-relaxed">
+                אזהרה: חשיפה כרונית לסטרס סביבתי משנה את הארכיטקטורה המוחית.
+                גלוקוקורטיקואידים פוגעים כעת בהיפוקמפוס, באמיגדלה ובקורטקס הפרה-פרונטלי.
+              </p>
+            </motion.div>
+          ) : (
+            <motion.div
+              key={`${envType}-${sliderVal}`}
+              initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
+              className={`rounded-sm border p-5 ${
+                envType === "biophilic"
+                  ? "border-emerald-700/40 bg-emerald-950/30"
+                  : "border-amber-700/40 bg-amber-950/30"
+              }`}
+            >
+              <div className="flex items-center gap-2 mb-1">
+                <div className={`w-2 h-2 rounded-full animate-pulse ${
+                  envType === "biophilic" ? "bg-emerald-400" : "bg-amber-500"
+                }`} />
+                <span className={`text-xs font-heebo font-bold ${
+                  envType === "biophilic" ? "text-emerald-400" : "text-amber-400"
+                }`}>{TIMELINE_LABELS[sliderVal]}</span>
+              </div>
+              <p className={`font-heebo text-sm leading-relaxed ${
+                envType === "biophilic" ? "text-emerald-300/90" : "text-amber-300/90"
+              }`}>{phase}</p>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+      <div className={`absolute bottom-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent ${
+        isSevere ? "via-red-700/60" : envType === "biophilic" ? "via-accent/60" : "via-amber-700/40"
+      } to-transparent`} />
+    </div>
+  );
+}
+
 // ─── Layout ─────────────────────────────────────────────────────────────────
 export default function FeaturesGrid() {
   return (
@@ -295,7 +568,7 @@ export default function FeaturesGrid() {
         </h2>
       </div>
 
-      {/* Asymmetric grid */}
+      {/* Asymmetric grid — Row 1: original features */}
       <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-5 md:gap-6">
         <div className="md:translate-y-8"><ScannerCard /></div>
         <div><CompassCard /></div>
@@ -309,6 +582,25 @@ export default function FeaturesGrid() {
           />
         </div>
       </div>
-    </section>
-  );
-}
+
+      {/* Section divider */}
+      <div className="max-w-6xl mx-auto my-20 md:my-28">
+        <div className="flex items-center gap-4">
+          <div className="flex-1 h-[1px] bg-gradient-to-l from-border to-transparent" />
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-[1px] bg-accent" />
+            <span className="text-xs tracking-[0.2em] text-accent-foreground/50 font-heebo">מודולים מתקדמים</span>
+          </div>
+          <div className="flex-1 h-[1px] bg-gradient-to-r from-border to-transparent" />
+        </div>
+      </div>
+
+      {/* Row 2: advanced modules */}
+        <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-5 md:gap-6">
+          <ROICard />
+          <DemographicCard />
+          <BrainTimelineCard />
+        </div>
+      </section>
+      );
+      }

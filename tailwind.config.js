@@ -4,6 +4,10 @@ module.exports = {
     content: ["./index.html", "./src/**/*.{ts,tsx,js,jsx}"],
   theme: {
   	extend: {
+  		fontFamily: {
+  			heebo: ['var(--font-heebo)'],
+  			frank: ['var(--font-frank)'],
+  		},
   		borderRadius: {
   			lg: 'var(--radius)',
   			md: 'calc(var(--radius) - 2px)',
@@ -63,25 +67,27 @@ module.exports = {
   		},
   		keyframes: {
   			'accordion-down': {
-  				from: {
-  					height: '0'
-  				},
-  				to: {
-  					height: 'var(--radix-accordion-content-height)'
-  				}
+  				from: { height: '0' },
+  				to: { height: 'var(--radix-accordion-content-height)' }
   			},
   			'accordion-up': {
-  				from: {
-  					height: 'var(--radix-accordion-content-height)'
-  				},
-  				to: {
-  					height: '0'
-  				}
-  			}
+  				from: { height: 'var(--radix-accordion-content-height)' },
+  				to: { height: '0' }
+  			},
+  			'beam-drift': {
+  				'0%, 100%': { opacity: '0.12', transform: 'translateX(0) skewX(-15deg)' },
+  				'50%': { opacity: '0.22', transform: 'translateX(20px) skewX(-15deg)' },
+  			},
+  			'moss-pulse': {
+  				'0%, 100%': { opacity: '0.6' },
+  				'50%': { opacity: '1' },
+  			},
   		},
   		animation: {
   			'accordion-down': 'accordion-down 0.2s ease-out',
-  			'accordion-up': 'accordion-up 0.2s ease-out'
+  			'accordion-up': 'accordion-up 0.2s ease-out',
+  			'beam-drift': 'beam-drift 8s ease-in-out infinite',
+  			'moss-pulse': 'moss-pulse 4s ease-in-out infinite',
   		}
   	}
   },

@@ -140,7 +140,6 @@ function CompassCard() {
         <span className="text-[9px] tracking-[0.3em] text-muted-foreground/40 font-heebo uppercase">Body Compass</span>
       </div>
       <h3 className="font-frank text-xl md:text-2xl font-bold text-foreground mb-3">מצפן גופני</h3>
-      <h3 className="font-frank text-xl md:text-2xl font-bold text-foreground mb-3">מצפן גופני</h3>
       <p className="font-heebo text-sm text-muted-foreground leading-[1.8] mb-8 font-light">
         ניטור HRV ותגובת ציר ה-HPA בזמן אמת.
       </p>
@@ -150,7 +149,7 @@ function CompassCard() {
         <span className={env === "corridor" ? "text-foreground font-medium" : "text-muted-foreground"}>מסדרון</span>
         <button
           onClick={() => setEnv(e => e === "corridor" ? "biophilic" : "corridor")}
-          className={`relative w-11 h-5 transition-colors duration-400 border ${env === "biophilic" ? "bg-accent/20 border-accent/30" : "bg-secondary border-border"}`}
+          className={`relative w-11 h-5 transition-colors duration-400 border overflow-hidden ${env === "biophilic" ? "bg-accent/20 border-accent/30" : "bg-secondary border-border"}`}
         >
           <motion.div
             animate={{ x: env === "biophilic" ? 22 : 2 }}

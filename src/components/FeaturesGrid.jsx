@@ -27,7 +27,7 @@ const SCAN_RESULTS = [
 ];
 
 function ScannerCard() {
-  const [state, setState] = useState("idle"); // idle | scanning | result
+  const [state, setState] = useState("idle");
   const [result, setResult] = useState(null);
   const [dots, setDots] = useState("");
 
@@ -46,65 +46,48 @@ function ScannerCard() {
   const handleReset = () => { setState("idle"); setResult(null); };
 
   return (
-    <div className="relative overflow-hidden rounded-sm p-8 md:p-10 h-full border border-border/60 bg-gradient-to-br from-card via-card to-secondary/30 hover:border-primary/30 transition-all duration-700">
-      <div className="mb-6 text-3xl">🔬</div>
+    <div className="relative p-9 md:p-10 h-full border-border bg-background">
+      <div className="flex items-center gap-3 mb-8">
+        <span className="font-frank text-[11px] text-muted-foreground/50 tabular-nums">01</span>
+        <div className="h-px flex-1 bg-border/60" />
+        <span className="text-[9px] tracking-[0.3em] text-muted-foreground/40 font-heebo uppercase">AR Scanner</span>
+      </div>
       <h3 className="font-frank text-xl md:text-2xl font-bold text-foreground mb-3">ביופרופיל הורמונלי</h3>
-      <p className="font-heebo text-sm text-muted-foreground leading-relaxed mb-6">
+      <p className="font-heebo text-sm text-muted-foreground leading-[1.8] mb-8 font-light">
         סורק AR שמעריך אור טבעי, חומרים וצמחייה — ומתרגם את החלל שלך לפרופיל הורמונלי מדויק.
       </p>
 
       <AnimatePresence mode="wait">
         {state === "idle" && (
-          <motion.button
-            key="btn"
-            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+          <motion.button key="btn" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
             onClick={handleScan}
-            className="bg-primary text-primary-foreground font-heebo font-medium px-6 py-2.5 rounded-sm text-sm hover:bg-primary/85 transition-all duration-300"
-          >
-            סרוק חדר
-          </motion.button>
+            className="bg-foreground text-background font-heebo font-medium px-6 py-3 text-sm hover:bg-foreground/85 transition-colors"
+          >סרוק חדר</motion.button>
         )}
-
         {state === "scanning" && (
-          <motion.div
-            key="scanning"
-            initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
-            className="space-y-3"
-          >
-            {/* Scanning bar */}
-            <div className="h-1 w-full bg-border rounded-full overflow-hidden">
-              <motion.div
-                className="h-full bg-primary"
-                initial={{ width: "0%" }}
-                animate={{ width: "100%" }}
-                transition={{ duration: 3, ease: "linear" }}
-              />
+          <motion.div key="scanning" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="space-y-3">
+            <div className="h-px w-full bg-border overflow-hidden">
+              <motion.div className="h-full bg-foreground" initial={{ width: "0%" }} animate={{ width: "100%" }} transition={{ duration: 3, ease: "linear" }} />
             </div>
-            <p className="text-sm font-heebo text-muted-foreground">
-              Scanning light, plants, materials{dots}
-            </p>
+            <p className="text-xs font-heebo text-muted-foreground">Scanning light, plants, materials{dots}</p>
           </motion.div>
         )}
-
         {state === "result" && result && (
-          <motion.div
-            key="result"
-            initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
-            className={`rounded-sm p-4 border bg-gradient-to-br ${result.bg} ${result.border}`}
+          <motion.div key="result" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
+            className="border border-border bg-secondary/30 p-5"
           >
             <div className="flex items-center gap-2 mb-2">
-              <div className={`w-2 h-2 rounded-full ${result.dot} animate-pulse`} />
-              <span className={`font-frank text-base font-bold ${result.text}`}>{result.icon} {result.title}</span>
+              <div className={`w-1.5 h-1.5 rounded-full ${result.type === "stress" ? "bg-foreground/60" : "bg-accent/70"} animate-pulse`} />
+              <span className="font-frank text-base font-bold text-foreground">{result.title}</span>
             </div>
-            <p className="text-xs text-foreground/70 font-heebo leading-relaxed mb-3">{result.body}</p>
-            <button onClick={handleReset} className="text-xs text-muted-foreground underline underline-offset-2 hover:text-foreground transition-colors font-heebo">
+            <p className="text-xs text-muted-foreground font-heebo leading-[1.8] mb-4">{result.body}</p>
+            <button onClick={handleReset} className="text-xs text-muted-foreground underline underline-offset-4 decoration-border hover:decoration-muted-foreground hover:text-foreground transition-colors font-heebo">
               סרוק שוב
             </button>
           </motion.div>
         )}
       </AnimatePresence>
-
-      <div className="absolute bottom-0 left-0 w-full h-[2px] bg-gradient-to-r from-accent/0 via-accent/40 to-accent/0" />
+      <div className="absolute bottom-0 left-0 w-8 h-px bg-accent/50" />
     </div>
   );
 }
@@ -150,51 +133,56 @@ function CompassCard() {
   ];
 
   return (
-    <div className="relative overflow-hidden rounded-sm p-8 md:p-10 h-full border border-border/60 bg-gradient-to-br from-card via-card to-secondary/30 hover:border-primary/30 transition-all duration-700">
-      <div className="mb-6 text-3xl">🧭</div>
+    <div className="relative p-9 md:p-10 h-full bg-background">
+      <div className="flex items-center gap-3 mb-8">
+        <span className="font-frank text-[11px] text-muted-foreground/50 tabular-nums">02</span>
+        <div className="h-px flex-1 bg-border/60" />
+        <span className="text-[9px] tracking-[0.3em] text-muted-foreground/40 font-heebo uppercase">Body Compass</span>
+      </div>
       <h3 className="font-frank text-xl md:text-2xl font-bold text-foreground mb-3">מצפן גופני</h3>
-      <p className="font-heebo text-sm text-muted-foreground leading-relaxed mb-6">
-        מסתנכרן עם שעונים חכמים לניטור HRV ותגובת ציר ה-HPA בזמן אמת.
+      <h3 className="font-frank text-xl md:text-2xl font-bold text-foreground mb-3">מצפן גופני</h3>
+      <p className="font-heebo text-sm text-muted-foreground leading-[1.8] mb-8 font-light">
+        ניטור HRV ותגובת ציר ה-HPA בזמן אמת.
       </p>
 
       {/* Toggle */}
-      <div className="flex items-center gap-3 mb-6 text-sm font-heebo">
-        <span className={env === "corridor" ? "text-amber-400 font-medium" : "text-muted-foreground"}>
-          מסדרון
-        </span>
+      <div className="flex items-center gap-3 mb-8 text-sm font-heebo">
+        <span className={env === "corridor" ? "text-foreground font-medium" : "text-muted-foreground"}>מסדרון</span>
         <button
           onClick={() => setEnv(e => e === "corridor" ? "biophilic" : "corridor")}
-          className={`relative w-12 h-6 rounded-full transition-colors duration-500 ${env === "biophilic" ? "bg-emerald-600/60" : "bg-amber-700/50"}`}
+          className={`relative w-11 h-5 transition-colors duration-400 border ${env === "biophilic" ? "bg-accent/20 border-accent/30" : "bg-secondary border-border"}`}
         >
           <motion.div
-            animate={{ x: env === "biophilic" ? 24 : 2 }}
+            animate={{ x: env === "biophilic" ? 22 : 2 }}
             transition={{ type: "spring", stiffness: 500, damping: 30 }}
-            className="absolute top-1 w-4 h-4 bg-foreground rounded-full"
+            className={`absolute top-0.5 w-3.5 h-3.5 ${env === "biophilic" ? "bg-accent" : "bg-foreground/60"}`}
           />
         </button>
-        <span className={env === "biophilic" ? "text-emerald-400 font-medium" : "text-muted-foreground"}>
-          משרד ביופילי
-        </span>
+        <span className={env === "biophilic" ? "text-accent font-medium" : "text-muted-foreground"}>משרד ביופילי</span>
       </div>
 
       {/* Environment label */}
-      <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-sm border text-xs font-heebo mb-4 ${data.bg} ${data.color}`}>
-        <div className={`w-1.5 h-1.5 rounded-full ${env === "biophilic" ? "bg-emerald-400" : "bg-amber-400"} animate-pulse`} />
+      <div className={`inline-flex items-center gap-2 px-3 py-1 border text-xs font-heebo mb-5 ${
+        env === "biophilic" ? "border-accent/25 bg-accent/5 text-accent" : "border-border bg-secondary/40 text-muted-foreground"
+      }`}>
+        <div className={`w-1.5 h-1.5 ${env === "biophilic" ? "bg-accent" : "bg-foreground/40"} animate-pulse`} />
         {data.label}
       </div>
 
       {/* Metrics */}
-      <div className="grid grid-cols-3 gap-3">
+      <div className="grid grid-cols-3 gap-2 mt-5">
         {metrics.map((m) => (
-          <div key={m.label} className="bg-background/60 rounded-sm p-3 border border-border/40 text-center">
-            <p className={`font-frank text-xl font-bold ${data.color} tabular-nums`}>
+          <div key={m.label} className="bg-secondary/40 p-3 border border-border/40 text-center">
+            <p className={`font-frank text-xl font-bold tabular-nums ${
+              env === "biophilic" ? "text-accent" : "text-foreground"
+            }`}>
               <AnimatedNumber value={m.value} decimals={m.decimals} />
             </p>
             <p className="text-[10px] text-muted-foreground font-heebo mt-1 leading-tight">{m.label}</p>
           </div>
         ))}
       </div>
-      <div className="absolute bottom-0 left-0 w-full h-[2px] bg-gradient-to-r from-accent/0 via-accent/20 to-accent/0" />
+      <div className="absolute bottom-0 left-0 w-8 h-px bg-accent/50" />
     </div>
   );
 }
@@ -231,52 +219,46 @@ function TimerCard() {
   const ss = String(seconds % 60).padStart(2, "0");
 
   return (
-    <div className="relative overflow-hidden rounded-sm p-8 md:p-10 h-full border border-border/60 bg-gradient-to-br from-card via-card to-secondary/30 hover:border-primary/30 transition-all duration-700">
-      <div className="mb-6 text-3xl">🌿</div>
+    <div className="relative p-9 md:p-10 h-full bg-background">
+      <div className="flex items-center gap-3 mb-8">
+        <span className="font-frank text-[11px] text-muted-foreground/50 tabular-nums">03</span>
+        <div className="h-px flex-1 bg-border/60" />
+        <span className="text-[9px] tracking-[0.3em] text-muted-foreground/40 font-heebo uppercase">Recovery Timer</span>
+      </div>
       <h3 className="font-frank text-xl md:text-2xl font-bold text-foreground mb-3">החלמה ב-4 דקות</h3>
-      <p className="font-heebo text-sm text-muted-foreground leading-relaxed mb-6">
-        סימולטור VR מבוסס תיאוריית ההחלמה הביופילית של רוג'ר אולריך. ארבע דקות. שינוי מדיד.
+      <p className="font-heebo text-sm text-muted-foreground leading-[1.8] mb-8 font-light">
+        מבוסס תיאוריית ההחלמה הביופילית של אולריך (1984). ארבע דקות. שינוי מדיד.
       </p>
 
-      {/* Timer display */}
-      <div className="flex items-baseline gap-2 mb-4">
+      <div className="flex items-baseline gap-2 mb-5">
         <span className="font-frank text-5xl font-bold text-foreground tabular-nums">{mm}:{ss}</span>
       </div>
 
-      {/* Progress bar */}
-      <div className="h-1 w-full bg-border rounded-full overflow-hidden mb-4">
-        <motion.div
-          className="h-full bg-gradient-to-r from-accent to-primary"
-          style={{ width: `${progress}%` }}
-          transition={{ duration: 0.5 }}
-        />
+      <div className="h-px w-full bg-border overflow-hidden mb-5">
+        <motion.div className="h-full bg-foreground" style={{ width: `${progress}%` }} transition={{ duration: 0.5 }} />
       </div>
 
-      {/* Phase text */}
       <AnimatePresence mode="wait">
-        <motion.p
-          key={phase.text}
-          initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }}
+        <motion.p key={phase.text} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }}
           transition={{ duration: 0.5 }}
-          className="text-xs text-accent-foreground/80 font-heebo leading-relaxed mb-5 min-h-[2.5rem]"
+          className="text-xs text-muted-foreground font-heebo leading-[1.8] mb-6 min-h-[2.5rem] font-light"
         >
           {(running || done) ? phase.text : "לחץ 'התחל' כדי להפעיל את תהליך ההחלמה."}
         </motion.p>
       </AnimatePresence>
 
-      {/* Controls */}
       <div className="flex gap-3">
         {!running ? (
-          <button onClick={handleStart} className="bg-accent/80 hover:bg-accent text-accent-foreground font-heebo font-medium px-6 py-2.5 rounded-sm text-sm transition-all duration-300">
+          <button onClick={handleStart} className="bg-foreground text-background font-heebo font-medium px-6 py-3 text-sm hover:bg-foreground/85 transition-colors">
             התחל החלמה
           </button>
         ) : (
-          <button onClick={handleStop} className="border border-border text-muted-foreground font-heebo px-6 py-2.5 rounded-sm text-sm hover:border-primary/40 hover:text-foreground transition-all duration-300">
+          <button onClick={handleStop} className="border border-border text-muted-foreground font-heebo px-6 py-3 text-sm hover:border-foreground/30 hover:text-foreground transition-colors">
             עצור
           </button>
         )}
       </div>
-      <div className="absolute bottom-0 left-0 w-full h-[2px] bg-gradient-to-r from-accent/0 via-accent/60 to-accent/0 animate-moss-pulse" />
+      <div className="absolute bottom-0 left-0 w-8 h-px bg-accent/50 animate-moss-pulse" />
     </div>
   );
 }
@@ -296,53 +278,53 @@ function ROICard() {
   };
 
   return (
-    <div className="relative overflow-hidden rounded-sm p-8 md:p-10 h-full border border-border/60 bg-gradient-to-br from-card via-card to-secondary/30 hover:border-primary/30 transition-all duration-700">
-      <div className="mb-6 text-3xl">💼</div>
+    <div className="relative p-9 md:p-10 h-full bg-background">
+      <div className="flex items-center gap-3 mb-8">
+        <span className="font-frank text-[11px] text-muted-foreground/50 tabular-nums">04</span>
+        <div className="h-px flex-1 bg-border/60" />
+        <span className="text-[9px] tracking-[0.3em] text-muted-foreground/40 font-heebo uppercase">ROI Calculator</span>
+      </div>
       <h3 className="font-frank text-xl md:text-2xl font-bold text-foreground mb-3">מחשבון חיסכון כלכלי</h3>
-      <p className="font-heebo text-sm text-muted-foreground leading-relaxed mb-6">
-        18% פחות ימי מחלה בסביבת עבודה עם אור יום תקין — מה זה שווה לארגון שלך?
+      <p className="font-heebo text-sm text-muted-foreground leading-[1.8] mb-8 font-light">
+        18% פחות ימי מחלה בסביבת עבודה עם אור יום תקני — מה זה שווה לארגון שלך?
       </p>
 
-      <div className="mb-4">
-        <label className="text-xs text-muted-foreground font-heebo block mb-2">מספר עובדים</label>
+      <div className="mb-6">
+        <label className="text-[10px] tracking-[0.3em] text-muted-foreground/60 font-heebo uppercase block mb-3">מספר עובדים</label>
         <input
-          type="number"
-          min="1"
-          value={employees}
+          type="number" min="1" value={employees}
           onChange={e => { setEmployees(Number(e.target.value)); setResult(null); }}
-          className="w-full bg-background/60 border border-border/60 rounded-sm px-4 py-2.5 text-foreground font-heebo text-sm focus:outline-none focus:border-primary/50 transition-colors"
+          className="w-full bg-background border border-border px-4 py-3 text-foreground font-heebo text-sm focus:outline-none focus:border-primary/40 transition-colors"
         />
       </div>
 
-      <button
-        onClick={handleCalc}
-        className="bg-primary text-primary-foreground font-heebo font-medium px-6 py-2.5 rounded-sm text-sm hover:bg-primary/85 transition-all duration-300 mb-5"
+      <button onClick={handleCalc}
+        className="bg-foreground text-background font-heebo font-medium px-6 py-3 text-sm hover:bg-foreground/85 transition-colors mb-6"
       >
         חשב כדאיות תאורה טבעית
       </button>
 
       <AnimatePresence>
         {result && (
-          <motion.div
-            initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
-            className="rounded-sm border border-primary/30 bg-primary/5 p-5 space-y-3"
+          <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
+            className="border border-border bg-secondary/30 p-5 space-y-4"
           >
             <div className="flex justify-between items-center">
               <span className="text-xs text-muted-foreground font-heebo">ימי מחלה שנחסכים בשנה</span>
-              <span className="font-frank text-2xl font-bold text-primary">{result.savedDays}</span>
+              <span className="font-frank text-2xl font-bold text-foreground">{result.savedDays}</span>
             </div>
-            <div className="h-[1px] bg-border/50" />
+            <div className="h-px bg-border" />
             <div className="flex justify-between items-center">
               <span className="text-xs text-muted-foreground font-heebo">חיסכון כספי משוער לשנה</span>
-              <span className="font-frank text-2xl font-bold text-primary">₪{result.savedCost}</span>
+              <span className="font-frank text-2xl font-bold text-foreground">₪{result.savedCost}</span>
             </div>
-            <p className="text-[10px] text-muted-foreground font-heebo pt-1">
-              * מחושב לפי 8 ימי מחלה ממוצע לעובד × ₪650 עלות יומית × 18% הפחתה (מחקר אור יום)
+            <p className="text-[10px] text-muted-foreground/50 font-heebo pt-1">
+              * 8 ימי מחלה × ₪650 עלות יומית × 18% הפחתה
             </p>
           </motion.div>
         )}
       </AnimatePresence>
-      <div className="absolute bottom-0 left-0 w-full h-[2px] bg-gradient-to-r from-primary/0 via-primary/30 to-primary/0" />
+      <div className="absolute bottom-0 left-0 w-8 h-px bg-primary/40" />
     </div>
   );
 }
@@ -358,26 +340,23 @@ function DemographicCard() {
   const data = DEMO_DATA[gender];
 
   return (
-    <div className="relative overflow-hidden rounded-sm p-8 md:p-10 h-full border border-border/60 bg-gradient-to-br from-card via-card to-secondary/30 hover:border-primary/30 transition-all duration-700">
-      <div className="mb-6 text-3xl">🗺️</div>
-      <h3 className="font-frank text-xl md:text-2xl font-bold text-foreground mb-3">סימולטור פגיעות דמוגרפית</h3>
-      <p className="font-heebo text-sm text-muted-foreground leading-relaxed mb-2">
+    <div className="relative p-9 md:p-10 h-full bg-background">
+      <div className="flex items-center gap-3 mb-8">
+        <span className="font-frank text-[11px] text-muted-foreground/50 tabular-nums">05</span>
+        <div className="h-px flex-1 bg-border/60" />
+        <span className="text-[9px] tracking-[0.3em] text-muted-foreground/40 font-heebo uppercase">Demographic Vulnerability</span>
+      </div>
+      <h3 className="font-frank text-xl md:text-2xl font-bold text-foreground mb-2">סימולטור פגיעות דמוגרפית</h3>
+      <p className="font-heebo text-sm text-muted-foreground leading-[1.8] mb-1 font-light">
         שכונה דלת ירוק — מי הגוף שסובל יותר?
       </p>
-      <p className="font-heebo text-xs text-muted-foreground/60 italic mb-6">
-        מחקרה של ד&quot;ר ג&apos;ני רואי
-      </p>
+      <p className="font-heebo text-xs text-muted-foreground/50 italic mb-8">מחקרה של ד&quot;ר ג'ני רואי</p>
 
-      {/* Toggle */}
-      <div className="flex items-center gap-3 mb-6 text-sm font-heebo">
+      <div className="flex items-center gap-3 mb-8 text-sm font-heebo">
         {["male", "female"].map(g => (
-          <button
-            key={g}
-            onClick={() => setGender(g)}
-            className={`px-5 py-2 rounded-sm border text-sm font-medium transition-all duration-300 ${
-              gender === g
-                ? "border-primary/60 bg-primary/10 text-primary"
-                : "border-border/40 text-muted-foreground hover:border-border"
+          <button key={g} onClick={() => setGender(g)}
+            className={`px-5 py-2.5 border text-sm transition-all duration-300 ${
+              gender === g ? "border-foreground/30 bg-secondary text-foreground" : "border-border text-muted-foreground hover:border-foreground/20"
             }`}
           >
             {DEMO_DATA[g].label}
@@ -385,44 +364,37 @@ function DemographicCard() {
         ))}
       </div>
 
-      {/* Cortisol bar */}
-      <div className="mb-3">
-        <div className="flex justify-between items-center mb-2">
+      <div className="mb-4">
+        <div className="flex justify-between items-center mb-3">
           <span className="text-xs text-muted-foreground font-heebo">קורטיזול בסיסי מדומה</span>
-          <motion.span
-            key={data.cortisol}
-            initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-            className={`font-frank text-xl font-bold ${data.color}`}
+          <motion.span key={data.cortisol} initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+            className="font-frank text-2xl font-bold text-foreground"
           >
             {data.cortisol} nmol/L
           </motion.span>
         </div>
-        <div className="h-2 w-full bg-border/40 rounded-full overflow-hidden">
-          <motion.div
-            animate={{ width: `${data.cortisol}%` }}
-            transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
-            className={`h-full rounded-full ${data.bar}`}
+        <div className="h-px w-full bg-border overflow-hidden">
+          <motion.div animate={{ width: `${data.cortisol}%` }} transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
+            className={`h-full ${gender === "female" ? "bg-foreground/70" : "bg-foreground/35"}`}
           />
         </div>
       </div>
 
       <AnimatePresence mode="wait">
-        <motion.p
-          key={gender}
-          initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
-          className={`text-xs font-heebo leading-relaxed mb-4 ${data.color}`}
+        <motion.p key={gender} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
+          className="text-sm font-heebo text-muted-foreground leading-[1.8] mb-5 font-light"
         >
           {data.desc}
         </motion.p>
       </AnimatePresence>
 
-      <div className="rounded-sm border border-border/40 bg-background/40 p-4">
-        <p className="text-xs text-muted-foreground font-heebo leading-relaxed">
+      <div className="border border-border bg-secondary/30 p-4">
+        <p className="text-xs text-muted-foreground font-heebo leading-[1.8]">
           נשים בשכונות דלות בטבע מציגות רמות קורטיזול גבוהות משמעותית.
           <span className="text-foreground/70"> המרחב אינו ניטרלי.</span>
         </p>
       </div>
-      <div className="absolute bottom-0 left-0 w-full h-[2px] bg-gradient-to-r from-red-500/0 via-red-500/20 to-red-500/0" />
+      <div className="absolute bottom-0 left-0 w-8 h-px bg-foreground/20" />
     </div>
   );
 }
@@ -458,33 +430,29 @@ function BrainTimelineCard() {
   const phase = PHASES[envType][sliderVal];
 
   return (
-    <div className={`relative overflow-hidden rounded-sm p-8 md:p-10 col-span-1 md:col-span-2 border transition-all duration-700 bg-gradient-to-br from-card via-card to-secondary/30 ${
-      isSevere ? "border-red-800/60" : "border-border/60 hover:border-primary/30"
+    <div className={`relative p-9 md:p-10 col-span-1 md:col-span-2 border-t border-b border-border transition-all duration-400 bg-background ${
+      isSevere ? "bg-red-50/60" : ""
     }`}>
-      {/* Severe warning glow */}
-      {isSevere && (
-        <div className="absolute inset-0 bg-gradient-to-br from-red-950/40 via-background to-amber-950/30 pointer-events-none" />
-      )}
-
       <div className="relative z-10">
-        <div className="mb-6 text-3xl">🧠</div>
+        <div className="flex items-center gap-3 mb-8">
+          <span className="font-frank text-[11px] text-muted-foreground/50 tabular-nums">06</span>
+          <div className="h-px flex-1 bg-border/60" />
+          <span className="text-[9px] tracking-[0.3em] text-muted-foreground/40 font-heebo uppercase">Brain Architecture Timeline</span>
+        </div>
         <h3 className="font-frank text-xl md:text-2xl font-bold text-foreground mb-3">ציר זמן חשיפה כרונית</h3>
-        <p className="font-heebo text-sm text-muted-foreground leading-relaxed mb-6">
+        <p className="font-heebo text-sm text-muted-foreground leading-[1.8] mb-8 max-w-xl font-light">
           מה קורה למוח לאורך זמן — בסביבה ביופילית לעומת חדר ללא חלונות?
         </p>
 
-        {/* Env toggle */}
-        <div className="flex items-center gap-3 mb-8 text-sm font-heebo">
-          {[("biophilic"), ("windowless")].map(e => (
-            <button
-              key={e}
-              onClick={() => setEnvType(e)}
-              className={`px-5 py-2 rounded-sm border text-sm font-medium transition-all duration-300 ${
+        <div className="flex items-center gap-3 mb-10 text-sm font-heebo">
+          {["biophilic", "windowless"].map(e => (
+            <button key={e} onClick={() => setEnvType(e)}
+              className={`px-5 py-2.5 border text-sm transition-all duration-300 ${
                 envType === e
                   ? e === "biophilic"
-                    ? "border-emerald-600/60 bg-emerald-500/10 text-emerald-400"
-                    : "border-red-700/60 bg-red-500/10 text-red-400"
-                  : "border-border/40 text-muted-foreground hover:border-border"
+                    ? "border-accent/30 bg-accent/5 text-accent"
+                    : "border-foreground/20 bg-secondary text-foreground"
+                  : "border-border text-muted-foreground hover:border-foreground/20"
               }`}
             >
               {e === "biophilic" ? "ביופילי" : "חדר ללא חלונות"}
@@ -492,64 +460,47 @@ function BrainTimelineCard() {
           ))}
         </div>
 
-        {/* Slider */}
-        <div className="mb-4">
-          <div className="flex justify-between text-[10px] text-muted-foreground font-heebo mb-2">
+        <div className="mb-6">
+          <div className="flex justify-between text-[10px] text-muted-foreground/50 font-heebo mb-2">
             {TIMELINE_LABELS.map(l => <span key={l}>{l}</span>)}
           </div>
-          <input
-            type="range" min="0" max="6" step="1"
-            value={sliderVal}
+          <input type="range" min="0" max="6" step="1" value={sliderVal}
             onChange={e => setSliderVal(Number(e.target.value))}
-            className="w-full accent-primary cursor-pointer"
+            className="w-full accent-foreground cursor-pointer"
           />
         </div>
 
-        {/* Phase display */}
         <AnimatePresence mode="wait">
           {isSevere ? (
-            <motion.div
-              key="severe"
-              initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
-              className="rounded-sm border border-red-800/60 bg-red-950/40 p-5"
+            <motion.div key="severe" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
+              className="border border-foreground/20 bg-secondary/60 p-6"
             >
-              <div className="flex items-center gap-2 mb-2">
-                <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
-                <span className="text-red-400 text-xs font-heebo font-bold tracking-wider">אזהרה קלינית</span>
+              <div className="flex items-center gap-2 mb-3">
+                <div className="w-1.5 h-1.5 bg-foreground/60 animate-pulse" />
+                <span className="text-[10px] tracking-[0.3em] text-foreground/50 font-heebo uppercase">אזהרה קלינית</span>
               </div>
-              <p className="font-frank text-base md:text-lg text-red-300 leading-relaxed">
-                אזהרה: חשיפה כרונית לסטרס סביבתי משנה את הארכיטקטורה המוחית.
-                גלוקוקורטיקואידים פוגעים כעת בהיפוקמפוס, באמיגדלה ובקורטקס הפרה-פרונטלי.
+              <p className="font-frank text-lg text-foreground leading-relaxed">
+                אזהרה: חשיפה כרונית לסטרס סביבתי משנה את הארכיטקטורה המוחית. גלוקוקורטיקואידים פוגעים כעת בהיפוקמפוס, באמיגדלה ובקורטקס הפרה-פרונטלי.
               </p>
             </motion.div>
           ) : (
-            <motion.div
-              key={`${envType}-${sliderVal}`}
-              initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
-              className={`rounded-sm border p-5 ${
-                envType === "biophilic"
-                  ? "border-emerald-700/40 bg-emerald-950/30"
-                  : "border-amber-700/40 bg-amber-950/30"
+            <motion.div key={`${envType}-${sliderVal}`} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
+              className={`border p-6 ${
+                envType === "biophilic" ? "border-accent/25 bg-accent/[0.04]" : "border-border bg-secondary/30"
               }`}
             >
-              <div className="flex items-center gap-2 mb-1">
-                <div className={`w-2 h-2 rounded-full animate-pulse ${
-                  envType === "biophilic" ? "bg-emerald-400" : "bg-amber-500"
-                }`} />
-                <span className={`text-xs font-heebo font-bold ${
-                  envType === "biophilic" ? "text-emerald-400" : "text-amber-400"
+              <div className="flex items-center gap-2 mb-2">
+                <div className={`w-1.5 h-1.5 animate-pulse ${envType === "biophilic" ? "bg-accent" : "bg-foreground/40"}`} />
+                <span className={`text-[10px] font-heebo font-medium tracking-wider ${
+                  envType === "biophilic" ? "text-accent/70" : "text-muted-foreground"
                 }`}>{TIMELINE_LABELS[sliderVal]}</span>
               </div>
-              <p className={`font-heebo text-sm leading-relaxed ${
-                envType === "biophilic" ? "text-emerald-300/90" : "text-amber-300/90"
-              }`}>{phase}</p>
+              <p className="font-heebo text-sm leading-[1.9] text-foreground/75 font-light">{phase}</p>
             </motion.div>
           )}
         </AnimatePresence>
       </div>
-      <div className={`absolute bottom-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent ${
-        isSevere ? "via-red-700/60" : envType === "biophilic" ? "via-accent/60" : "via-amber-700/40"
-      } to-transparent`} />
+      <div className="absolute bottom-0 left-0 w-8 h-px bg-accent/40" />
     </div>
   );
 }
@@ -590,54 +541,65 @@ function BlueprintCard() {
   const handleReset    = () => { setState("idle"); setFileName(null); };
 
   return (
-    <div className="relative overflow-hidden rounded-sm p-8 md:p-10 col-span-1 md:col-span-2 border border-border/60 bg-gradient-to-br from-card via-card to-secondary/30 hover:border-emerald-700/30 transition-all duration-700">
+    <div className="relative overflow-hidden col-span-1 md:col-span-2 border border-border bg-card hover:border-primary/20 transition-all duration-500 p-9 md:p-12">
       <div className="relative z-10">
-        <div className="mb-6 text-3xl">📐</div>
-        <h3 className="font-frank text-xl md:text-2xl font-bold text-foreground mb-3">אישור שרטוט ותעודת ביופרופיל הורמונלי</h3>
-        <p className="font-heebo text-sm text-muted-foreground leading-relaxed mb-8">
+        {/* Header */}
+        <div className="flex items-center gap-3 mb-10">
+          <span className="font-frank text-[11px] text-muted-foreground/50 tabular-nums">07</span>
+          <div className="h-px flex-1 bg-border/60" />
+          <span className="text-[10px] tracking-[0.3em] text-muted-foreground/50 font-heebo uppercase">Blueprint Certification</span>
+        </div>
+        <h3 className="font-frank text-2xl md:text-3xl font-bold text-foreground mb-3">אישור שרטוט ותעודת ביופרופיל הורמונלי</h3>
+        <p className="font-heebo text-sm text-muted-foreground leading-[1.8] mb-10 max-w-xl font-light">
           הגבול הבא הוא בשרטוט. בקרוב תוכניות בנייה ידרשו ביופרופיל הורמונלי לצד יעילות אנרגטית.
         </p>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
           {/* Dropzone */}
           <div>
-            <label className="text-xs text-muted-foreground font-heebo block mb-2">העלה שרטוט אדריכלי</label>
+            <label className="text-[10px] tracking-[0.3em] text-muted-foreground/60 font-heebo uppercase block mb-3">העלאת שרטוט אדריכלי</label>
             <label
               onDragOver={e => { e.preventDefault(); setDragging(true); }}
               onDragLeave={() => setDragging(false)}
               onDrop={handleDrop}
-              className={`flex flex-col items-center justify-center gap-3 rounded-sm border-2 border-dashed cursor-pointer transition-all duration-300 py-8 px-4 ${
+              className={`flex flex-col items-center justify-center gap-3 border-2 border-dashed cursor-pointer transition-all duration-300 py-10 px-4 ${
                 dragging
-                  ? "border-emerald-500/70 bg-emerald-950/30"
+                  ? "border-accent/60 bg-accent/5"
                   : fileName
-                  ? "border-emerald-600/50 bg-emerald-950/20"
-                  : "border-border/50 hover:border-emerald-700/40 bg-background/30"
+                  ? "border-accent/40 bg-accent/[0.03]"
+                  : "border-border hover:border-muted-foreground/40 bg-secondary/30"
               }`}
             >
               <input type="file" className="hidden" accept=".pdf,.dwg,.png,.jpg" onChange={handleFileInput} />
-              <span className="text-2xl">{fileName ? "📄" : "⬆️"}</span>
+              <div className={`w-8 h-8 border flex items-center justify-center transition-colors ${
+                fileName ? "border-accent/40" : "border-border"
+              }`}>
+                <span className="text-sm">{fileName ? "↓" : "↑"}</span>
+              </div>
               <span className="text-xs font-heebo text-muted-foreground text-center">
-                {fileName ? fileName : "גרור שרטוט לכאן או לחץ לבחירת קובץ"}
+                {fileName ? fileName : "גרור קובץ לכאן — PDF, DWG, PNG"}
               </span>
-              {fileName && <span className="text-[10px] text-emerald-400 font-heebo">✓ קובץ נטען</span>}
+              {fileName && <span className="text-[10px] text-accent font-heebo tracking-wider">✓ קובץ נטען</span>}
             </label>
           </div>
 
-          {/* Building type */}
-          <div>
-            <label className="text-xs text-muted-foreground font-heebo block mb-2">סוג מבנה</label>
-            <select
-              value={buildingType}
-              onChange={e => setBuildingType(e.target.value)}
-              className="w-full bg-background/60 border border-border/60 rounded-sm px-4 py-2.5 text-foreground font-heebo text-sm focus:outline-none focus:border-primary/50 transition-colors mb-4"
-            >
-              {BUILDING_TYPES.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
-            </select>
+          {/* Building type + action */}
+          <div className="flex flex-col justify-between gap-6">
+            <div>
+              <label className="text-[10px] tracking-[0.3em] text-muted-foreground/60 font-heebo uppercase block mb-3">סוג מבנה</label>
+              <select
+                value={buildingType}
+                onChange={e => setBuildingType(e.target.value)}
+                className="w-full bg-background border border-border px-4 py-3 text-foreground font-heebo text-sm focus:outline-none focus:border-primary/40 transition-colors"
+              >
+                {BUILDING_TYPES.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
+              </select>
+            </div>
 
             {state === "idle" && (
               <button
                 onClick={handleGenerate}
-                className="w-full bg-emerald-800/70 hover:bg-emerald-700/70 text-emerald-100 font-heebo font-medium px-6 py-3 rounded-sm text-sm transition-all duration-300 border border-emerald-700/40"
+                className="bg-foreground text-background font-heebo font-medium px-6 py-3.5 text-sm tracking-wide hover:bg-foreground/85 transition-colors duration-300"
               >
                 הפק דוח תקן אנדוקריני
               </button>
@@ -645,8 +607,8 @@ function BlueprintCard() {
 
             {state === "analyzing" && (
               <div className="space-y-3">
-                <div className="h-1 w-full bg-border rounded-full overflow-hidden">
-                  <motion.div className="h-full bg-emerald-500" initial={{ width: "0%" }} animate={{ width: "100%" }} transition={{ duration: 2, ease: "linear" }} />
+                <div className="h-px w-full bg-border overflow-hidden">
+                  <motion.div className="h-full bg-foreground" initial={{ width: "0%" }} animate={{ width: "100%" }} transition={{ duration: 2, ease: "linear" }} />
                 </div>
                 <p className="text-xs font-heebo text-muted-foreground">מנתח מסלולי אור טבעי וחומרי גלם{dots}</p>
               </div>
@@ -658,44 +620,44 @@ function BlueprintCard() {
         <AnimatePresence>
           {state === "certified" && (
             <motion.div
-              initial={{ opacity: 0, y: 16, scale: 0.97 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
+              initial={{ opacity: 0, y: 14 }}
+              animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0 }}
-              transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
-              className="relative rounded-sm border border-emerald-600/50 bg-gradient-to-br from-emerald-950/60 via-card to-teal-950/30 p-6 md:p-8 overflow-hidden"
+              transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+              className="relative border border-accent/30 bg-accent/[0.03] p-8 md:p-10"
             >
-              {/* Corner ornaments */}
-              <div className="absolute top-3 right-3 w-5 h-5 border-t-2 border-r-2 border-emerald-500/40" />
-              <div className="absolute top-3 left-3 w-5 h-5 border-t-2 border-l-2 border-emerald-500/40" />
-              <div className="absolute bottom-3 right-3 w-5 h-5 border-b-2 border-r-2 border-emerald-500/40" />
-              <div className="absolute bottom-3 left-3 w-5 h-5 border-b-2 border-l-2 border-emerald-500/40" />
+              {/* Corner marks */}
+              <div className="absolute top-4 right-4 w-5 h-5 border-t border-r border-accent/30" />
+              <div className="absolute top-4 left-4 w-5 h-5 border-t border-l border-accent/30" />
+              <div className="absolute bottom-4 right-4 w-5 h-5 border-b border-r border-accent/30" />
+              <div className="absolute bottom-4 left-4 w-5 h-5 border-b border-l border-accent/30" />
 
-              <div className="text-center mb-4">
-                <div className="inline-flex items-center gap-2 bg-emerald-500/15 border border-emerald-500/30 rounded-sm px-4 py-1.5 mb-4">
-                  <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                  <span className="text-[10px] tracking-[0.25em] text-emerald-400 font-heebo uppercase">Certified — Architectural Endocrinology Standard</span>
+              <div className="text-center">
+                <div className="inline-flex items-center gap-2 border border-accent/25 px-5 py-1.5 mb-6">
+                  <div className="w-1.5 h-1.5 bg-accent animate-moss-pulse" />
+                  <span className="text-[9px] tracking-[0.35em] text-accent/80 font-heebo uppercase">Certified — Architectural Endocrinology Standard</span>
                 </div>
-                <h4 className="font-frank text-xl md:text-2xl font-bold text-emerald-300 mb-2">
+                <h4 className="font-frank text-2xl md:text-3xl font-bold text-foreground mb-4 leading-snug">
                   תעודת ביופרופיל הורמונלי: השרטוט אושר.
                 </h4>
-                <p className="font-heebo text-sm text-foreground/75 leading-relaxed max-w-xl mx-auto">
+                <p className="font-heebo text-sm text-muted-foreground leading-[1.9] max-w-lg mx-auto font-light">
                   המבנה תומך באיזון ציר HPA. עומד בתקן האנדוקרינולוגיה האדריכלית, ומקדם החלמה פיזיולוגית והורדת קורטיזול.
                 </p>
               </div>
 
-              <div className="flex items-center justify-between mt-6 pt-4 border-t border-emerald-700/30">
-                <div className="flex gap-4 text-[10px] text-muted-foreground font-heebo">
-                  <span>סוג מבנה: <span className="text-emerald-400">{BUILDING_TYPES.find(t => t.value === buildingType)?.label}</span></span>
-                  <span>תאריך: <span className="text-emerald-400">{new Date().toLocaleDateString("he-IL")}</span></span>
+              <div className="flex items-center justify-between mt-8 pt-6 border-t border-border flex-wrap gap-4">
+                <div className="flex gap-6 text-[10px] text-muted-foreground/60 font-heebo">
+                  <span>סוג מבנה: <span className="text-foreground/70">{BUILDING_TYPES.find(t => t.value === buildingType)?.label}</span></span>
+                  <span>תאריך: <span className="text-foreground/70">{new Date().toLocaleDateString("he-IL")}</span></span>
                 </div>
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-5">
                   <button
                     onClick={() => window.print()}
-                    className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-emerald-400 transition-colors font-heebo border border-border/40 hover:border-emerald-700/40 px-3 py-1.5 rounded-sm"
+                    className="text-xs text-muted-foreground hover:text-foreground transition-colors font-heebo border border-border px-4 py-2 hover:border-muted-foreground/40"
                   >
-                    <span>🖨️</span> ייצא תעודה
+                    ייצא תעודה
                   </button>
-                  <button onClick={handleReset} className="text-xs text-muted-foreground underline underline-offset-2 hover:text-foreground transition-colors font-heebo">
+                  <button onClick={handleReset} className="text-xs text-muted-foreground hover:text-foreground underline underline-offset-4 decoration-border transition-colors font-heebo">
                     איפוס
                   </button>
                 </div>
@@ -704,7 +666,21 @@ function BlueprintCard() {
           )}
         </AnimatePresence>
       </div>
-      <div className="absolute bottom-0 left-0 w-full h-[2px] bg-gradient-to-r from-emerald-500/0 via-emerald-500/40 to-emerald-500/0" />
+    </div>
+  );
+}
+
+// ─── Section divider helper ──────────────────────────────────────────────────
+function SectionDivider({ label, sub }) {
+  return (
+    <div className="max-w-6xl mx-auto my-24 md:my-32 px-8 md:px-20">
+      <div className="border-t border-border pt-10 flex items-end justify-between">
+        <div>
+          <p className="text-[9px] tracking-[0.4em] text-muted-foreground/40 font-heebo uppercase mb-1">{sub}</p>
+          <h3 className="font-frank text-xl md:text-2xl font-bold text-foreground">{label}</h3>
+        </div>
+        <div className="w-2 h-2 bg-border" />
+      </div>
     </div>
   );
 }
@@ -712,67 +688,56 @@ function BlueprintCard() {
 // ─── Layout ─────────────────────────────────────────────────────────────────
 export default function FeaturesGrid() {
   return (
-    <section className="relative py-24 md:py-36 px-6 md:px-12" dir="rtl">
-      <div className="max-w-6xl mx-auto mb-16 md:mb-20">
-        <div className="flex items-center gap-3 mb-4">
-          <div className="w-12 h-[1px] bg-accent" />
-          <span className="text-xs tracking-[0.2em] text-accent-foreground/60 font-heebo">יכולות מרכזיות</span>
-        </div>
-        <h2 className="font-frank text-3xl md:text-4xl font-bold text-foreground">
-          הכלים שמחברים<span className="text-primary"> בין גוף למרחב</span>
-        </h2>
-      </div>
+    <section className="relative border-t border-border" dir="rtl">
 
-      {/* Row 1: core features */}
-      <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-5 md:gap-6">
-        <div className="md:translate-y-8"><ScannerCard /></div>
-        <div><CompassCard /></div>
-        <div><TimerCard /></div>
-        <div className="md:-translate-y-8">
-          <FeatureCard
-            icon="⚡"
-            title="אתגר השעה"
-            description='שאל את עצמך: ״מה החדר הזה אומר לגוף שלי?״ — משימות יומיות שמחדדות את המודעות הסביבתית שלך.'
-            index={3}
-          />
-        </div>
-      </div>
-
-      {/* Section divider — Advanced */}
-      <div className="max-w-6xl mx-auto my-20 md:my-28">
-        <div className="flex items-center gap-4">
-          <div className="flex-1 h-[1px] bg-gradient-to-l from-border to-transparent" />
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-[1px] bg-accent" />
-            <span className="text-xs tracking-[0.2em] text-accent-foreground/50 font-heebo">מודולים מתקדמים</span>
+      {/* ── Core tools ── */}
+      <div className="py-24 md:py-36 px-8 md:px-20">
+        <div className="max-w-6xl mx-auto mb-16">
+          <div className="flex items-center gap-3 mb-5">
+            <div className="w-6 h-px bg-accent" />
+            <span className="text-[10px] tracking-[0.35em] text-muted-foreground/60 font-heebo uppercase">Research Tools</span>
           </div>
-          <div className="flex-1 h-[1px] bg-gradient-to-r from-border to-transparent" />
+          <h2 className="font-frank text-3xl md:text-4xl font-bold text-foreground leading-tight">
+            כלי מחקר<br />
+            <span className="font-light">ואבחון סביבתי</span>
+          </h2>
         </div>
-      </div>
 
-      {/* Row 2: advanced modules */}
-      <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-5 md:gap-6">
-        <ROICard />
-        <DemographicCard />
-        <BrainTimelineCard />
-      </div>
-
-      {/* Section divider — Frontier */}
-      <div className="max-w-6xl mx-auto my-20 md:my-28">
-        <div className="flex items-center gap-4">
-          <div className="flex-1 h-[1px] bg-gradient-to-l from-border to-transparent" />
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-[1px] bg-emerald-700/50" />
-            <span className="text-xs tracking-[0.2em] text-emerald-500/50 font-heebo">הגבול הבא</span>
+        <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-px bg-border">
+          <div className="bg-background"><ScannerCard /></div>
+          <div className="bg-background"><CompassCard /></div>
+          <div className="bg-background"><TimerCard /></div>
+          <div className="bg-background">
+            <FeatureCard
+              icon="⚡"
+              title="אתגר השעה"
+              description='שאל את עצמך: ״מה החדר הזה אומר לגוף שלי?״ — משימות יומיות שמחדדות את המודעות הסביבתית שלך.'
+              index={3}
+            />
           </div>
-          <div className="flex-1 h-[1px] bg-gradient-to-r from-border to-transparent" />
         </div>
       </div>
 
-      {/* Row 3: blueprint certification */}
-      <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-5 md:gap-6">
-        <BlueprintCard />
+      <SectionDivider label="מודולים מתקדמים" sub="Advanced Modules" />
+
+      {/* ── Advanced modules ── */}
+      <div className="px-8 md:px-20 pb-24 md:pb-36">
+        <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-px bg-border">
+          <div className="bg-background"><ROICard /></div>
+          <div className="bg-background"><DemographicCard /></div>
+          <div className="bg-background col-span-1 md:col-span-2"><BrainTimelineCard /></div>
+        </div>
       </div>
+
+      <SectionDivider label="הגבול הבא" sub="The Next Frontier" />
+
+      {/* ── Blueprint ── */}
+      <div className="px-8 md:px-20 pb-24 md:pb-36">
+        <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-px bg-border">
+          <div className="bg-background col-span-1 md:col-span-2"><BlueprintCard /></div>
+        </div>
+      </div>
+
     </section>
   );
 }

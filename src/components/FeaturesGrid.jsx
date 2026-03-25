@@ -554,6 +554,161 @@ function BrainTimelineCard() {
   );
 }
 
+// ─── 7. Blueprint Certification ────────────────────────────────────────────
+const BUILDING_TYPES = [
+  { value: "hospital", label: "בית חולים" },
+  { value: "school",   label: "בית ספר" },
+  { value: "residential", label: "מגורים" },
+];
+
+function BlueprintCard() {
+  const [buildingType, setBuildingType] = useState("hospital");
+  const [dragging, setDragging] = useState(false);
+  const [fileName, setFileName] = useState(null);
+  const [state, setState] = useState("idle"); // idle | analyzing | certified
+  const [dots, setDots] = useState("");
+
+  useEffect(() => {
+    if (state !== "analyzing") return;
+    const dotInterval = setInterval(() => setDots(d => d.length >= 3 ? "" : d + "."), 400);
+    const timer = setTimeout(() => { clearInterval(dotInterval); setState("certified"); }, 2000);
+    return () => { clearInterval(dotInterval); clearTimeout(timer); };
+  }, [state]);
+
+  const handleDrop = (e) => {
+    e.preventDefault(); setDragging(false);
+    const file = e.dataTransfer?.files?.[0];
+    if (file) setFileName(file.name);
+  };
+
+  const handleFileInput = (e) => {
+    const file = e.target.files?.[0];
+    if (file) setFileName(file.name);
+  };
+
+  const handleGenerate = () => { setState("analyzing"); setDots(""); };
+  const handleReset    = () => { setState("idle"); setFileName(null); };
+
+  return (
+    <div className="relative overflow-hidden rounded-sm p-8 md:p-10 col-span-1 md:col-span-2 border border-border/60 bg-gradient-to-br from-card via-card to-secondary/30 hover:border-emerald-700/30 transition-all duration-700">
+      <div className="relative z-10">
+        <div className="mb-6 text-3xl">📐</div>
+        <h3 className="font-frank text-xl md:text-2xl font-bold text-foreground mb-3">אישור שרטוט ותעודת ביופרופיל הורמונלי</h3>
+        <p className="font-heebo text-sm text-muted-foreground leading-relaxed mb-8">
+          הגבול הבא הוא בשרטוט. בקרוב תוכניות בנייה ידרשו ביופרופיל הורמונלי לצד יעילות אנרגטית.
+        </p>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+          {/* Dropzone */}
+          <div>
+            <label className="text-xs text-muted-foreground font-heebo block mb-2">העלה שרטוט אדריכלי</label>
+            <label
+              onDragOver={e => { e.preventDefault(); setDragging(true); }}
+              onDragLeave={() => setDragging(false)}
+              onDrop={handleDrop}
+              className={`flex flex-col items-center justify-center gap-3 rounded-sm border-2 border-dashed cursor-pointer transition-all duration-300 py-8 px-4 ${
+                dragging
+                  ? "border-emerald-500/70 bg-emerald-950/30"
+                  : fileName
+                  ? "border-emerald-600/50 bg-emerald-950/20"
+                  : "border-border/50 hover:border-emerald-700/40 bg-background/30"
+              }`}
+            >
+              <input type="file" className="hidden" accept=".pdf,.dwg,.png,.jpg" onChange={handleFileInput} />
+              <span className="text-2xl">{fileName ? "📄" : "⬆️"}</span>
+              <span className="text-xs font-heebo text-muted-foreground text-center">
+                {fileName ? fileName : "גרור שרטוט לכאן או לחץ לבחירת קובץ"}
+              </span>
+              {fileName && <span className="text-[10px] text-emerald-400 font-heebo">✓ קובץ נטען</span>}
+            </label>
+          </div>
+
+          {/* Building type */}
+          <div>
+            <label className="text-xs text-muted-foreground font-heebo block mb-2">סוג מבנה</label>
+            <select
+              value={buildingType}
+              onChange={e => setBuildingType(e.target.value)}
+              className="w-full bg-background/60 border border-border/60 rounded-sm px-4 py-2.5 text-foreground font-heebo text-sm focus:outline-none focus:border-primary/50 transition-colors mb-4"
+            >
+              {BUILDING_TYPES.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
+            </select>
+
+            {state === "idle" && (
+              <button
+                onClick={handleGenerate}
+                className="w-full bg-emerald-800/70 hover:bg-emerald-700/70 text-emerald-100 font-heebo font-medium px-6 py-3 rounded-sm text-sm transition-all duration-300 border border-emerald-700/40"
+              >
+                הפק דוח תקן אנדוקריני
+              </button>
+            )}
+
+            {state === "analyzing" && (
+              <div className="space-y-3">
+                <div className="h-1 w-full bg-border rounded-full overflow-hidden">
+                  <motion.div className="h-full bg-emerald-500" initial={{ width: "0%" }} animate={{ width: "100%" }} transition={{ duration: 2, ease: "linear" }} />
+                </div>
+                <p className="text-xs font-heebo text-muted-foreground">מנתח מסלולי אור טבעי וחומרי גלם{dots}</p>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Certificate */}
+        <AnimatePresence>
+          {state === "certified" && (
+            <motion.div
+              initial={{ opacity: 0, y: 16, scale: 0.97 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+              className="relative rounded-sm border border-emerald-600/50 bg-gradient-to-br from-emerald-950/60 via-card to-teal-950/30 p-6 md:p-8 overflow-hidden"
+            >
+              {/* Corner ornaments */}
+              <div className="absolute top-3 right-3 w-5 h-5 border-t-2 border-r-2 border-emerald-500/40" />
+              <div className="absolute top-3 left-3 w-5 h-5 border-t-2 border-l-2 border-emerald-500/40" />
+              <div className="absolute bottom-3 right-3 w-5 h-5 border-b-2 border-r-2 border-emerald-500/40" />
+              <div className="absolute bottom-3 left-3 w-5 h-5 border-b-2 border-l-2 border-emerald-500/40" />
+
+              <div className="text-center mb-4">
+                <div className="inline-flex items-center gap-2 bg-emerald-500/15 border border-emerald-500/30 rounded-sm px-4 py-1.5 mb-4">
+                  <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                  <span className="text-[10px] tracking-[0.25em] text-emerald-400 font-heebo uppercase">Certified — Architectural Endocrinology Standard</span>
+                </div>
+                <h4 className="font-frank text-xl md:text-2xl font-bold text-emerald-300 mb-2">
+                  תעודת ביופרופיל הורמונלי: השרטוט אושר.
+                </h4>
+                <p className="font-heebo text-sm text-foreground/75 leading-relaxed max-w-xl mx-auto">
+                  המבנה תומך באיזון ציר HPA. עומד בתקן האנדוקרינולוגיה האדריכלית, ומקדם החלמה פיזיולוגית והורדת קורטיזול.
+                </p>
+              </div>
+
+              <div className="flex items-center justify-between mt-6 pt-4 border-t border-emerald-700/30">
+                <div className="flex gap-4 text-[10px] text-muted-foreground font-heebo">
+                  <span>סוג מבנה: <span className="text-emerald-400">{BUILDING_TYPES.find(t => t.value === buildingType)?.label}</span></span>
+                  <span>תאריך: <span className="text-emerald-400">{new Date().toLocaleDateString("he-IL")}</span></span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <button
+                    onClick={() => window.print()}
+                    className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-emerald-400 transition-colors font-heebo border border-border/40 hover:border-emerald-700/40 px-3 py-1.5 rounded-sm"
+                  >
+                    <span>🖨️</span> ייצא תעודה
+                  </button>
+                  <button onClick={handleReset} className="text-xs text-muted-foreground underline underline-offset-2 hover:text-foreground transition-colors font-heebo">
+                    איפוס
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+      <div className="absolute bottom-0 left-0 w-full h-[2px] bg-gradient-to-r from-emerald-500/0 via-emerald-500/40 to-emerald-500/0" />
+    </div>
+  );
+}
+
 // ─── Layout ─────────────────────────────────────────────────────────────────
 export default function FeaturesGrid() {
   return (
@@ -568,7 +723,7 @@ export default function FeaturesGrid() {
         </h2>
       </div>
 
-      {/* Asymmetric grid — Row 1: original features */}
+      {/* Row 1: core features */}
       <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-5 md:gap-6">
         <div className="md:translate-y-8"><ScannerCard /></div>
         <div><CompassCard /></div>
@@ -583,7 +738,7 @@ export default function FeaturesGrid() {
         </div>
       </div>
 
-      {/* Section divider */}
+      {/* Section divider — Advanced */}
       <div className="max-w-6xl mx-auto my-20 md:my-28">
         <div className="flex items-center gap-4">
           <div className="flex-1 h-[1px] bg-gradient-to-l from-border to-transparent" />
@@ -596,11 +751,28 @@ export default function FeaturesGrid() {
       </div>
 
       {/* Row 2: advanced modules */}
-        <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-5 md:gap-6">
-          <ROICard />
-          <DemographicCard />
-          <BrainTimelineCard />
+      <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-5 md:gap-6">
+        <ROICard />
+        <DemographicCard />
+        <BrainTimelineCard />
+      </div>
+
+      {/* Section divider — Frontier */}
+      <div className="max-w-6xl mx-auto my-20 md:my-28">
+        <div className="flex items-center gap-4">
+          <div className="flex-1 h-[1px] bg-gradient-to-l from-border to-transparent" />
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-[1px] bg-emerald-700/50" />
+            <span className="text-xs tracking-[0.2em] text-emerald-500/50 font-heebo">הגבול הבא</span>
+          </div>
+          <div className="flex-1 h-[1px] bg-gradient-to-r from-border to-transparent" />
         </div>
-      </section>
-      );
-      }
+      </div>
+
+      {/* Row 3: blueprint certification */}
+      <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-5 md:gap-6">
+        <BlueprintCard />
+      </div>
+    </section>
+  );
+}

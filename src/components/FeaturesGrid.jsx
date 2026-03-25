@@ -152,7 +152,7 @@ function CompassCard() {
           className={`relative w-11 h-5 transition-colors duration-400 border overflow-hidden ${env === "biophilic" ? "bg-accent/20 border-accent/30" : "bg-secondary border-border"}`}
         >
           <motion.div
-            animate={{ x: env === "biophilic" ? 22 : 2 }}
+            animate={{ x: env === "biophilic" ? 2 : 26 }}
             transition={{ type: "spring", stiffness: 500, damping: 30 }}
             className={`absolute top-0.5 w-3.5 h-3.5 ${env === "biophilic" ? "bg-accent" : "bg-foreground/60"}`}
           />

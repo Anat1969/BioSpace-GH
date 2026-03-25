@@ -11,14 +11,14 @@ export default function HeroSection() {
     <section className="relative min-h-screen flex flex-col justify-center overflow-hidden" dir="rtl">
 
       {/* ── Base gradient ── */}
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_60%_at_60%_-10%,hsl(38,30%,12%),hsl(30,10%,5%))]" />
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_60%_at_60%_-10%,hsl(36,40%,90%),hsl(36,30%,96%))]" />
 
       {/* ── Diagonal light beams ── */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         {[
-          { right: "28%", width: "w-48", delay: "0s",  opacity: "opacity-[0.14]", rotate: "rotate-[22deg]" },
-          { right: "55%", width: "w-28", delay: "4s",  opacity: "opacity-[0.07]", rotate: "rotate-[16deg]" },
-          { right: "10%", width: "w-20", delay: "7s",  opacity: "opacity-[0.09]", rotate: "rotate-[30deg]" },
+          { right: "28%", width: "w-48", delay: "0s",  opacity: "opacity-[0.09]", rotate: "rotate-[22deg]" },
+          { right: "55%", width: "w-28", delay: "4s",  opacity: "opacity-[0.05]", rotate: "rotate-[16deg]" },
+          { right: "10%", width: "w-20", delay: "7s",  opacity: "opacity-[0.06]", rotate: "rotate-[30deg]" },
         ].map((b, i) => (
           <div
             key={i}

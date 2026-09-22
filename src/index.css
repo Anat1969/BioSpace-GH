@@ -42,6 +42,14 @@
     --accent:           148 22% 45%;
     --accent-foreground: 120 10% 97%;
 
+    /* ── Semantic axis: stress (warm) ↔ bio (green) ── */
+    --stress:             24 76% 43%;   /* terracotta / warm amber */
+    --stress-soft:        26 64% 93%;
+    --stress-foreground:  22 80% 30%;
+    --bio:                152 48% 34%;  /* vivid emerald */
+    --bio-soft:           148 42% 91%;
+    --bio-foreground:     150 42% 22%;
+
     /* ── Destructive ── */
     --destructive:        0 65% 46%;
     --destructive-foreground: 0 0% 98%;
@@ -91,6 +99,12 @@
     --muted-foreground: 120 8% 50%;
     --accent:           148 20% 38%;
     --accent-foreground: 120 10% 92%;
+    --stress:             22 72% 54%;
+    --stress-soft:        22 40% 18%;
+    --stress-foreground:  24 82% 78%;
+    --bio:                150 42% 52%;
+    --bio-soft:           150 26% 16%;
+    --bio-foreground:     148 42% 82%;
     --destructive:        0 52% 38%;
     --destructive-foreground: 0 0% 98%;
     --border: 150 14% 20%;
@@ -151,4 +165,13 @@
   .animate-beam-drift { animation: beam-drift 10s ease-in-out infinite; }
   .animate-moss-pulse { animation: moss-pulse 5s ease-in-out infinite; }
   .animate-fade-up    { animation: fade-up 0.8s ease forwards; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-beam-drift,
+  .animate-moss-pulse,
+  .animate-fade-up {
+    animation: none !important;
+  }
+  html { scroll-behavior: auto; }
 }

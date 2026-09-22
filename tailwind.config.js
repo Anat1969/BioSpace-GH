@@ -40,6 +40,16 @@ module.exports = {
   				DEFAULT: 'hsl(var(--accent))',
   				foreground: 'hsl(var(--accent-foreground))'
   			},
+  			stress: {
+  				DEFAULT: 'hsl(var(--stress))',
+  				soft: 'hsl(var(--stress-soft))',
+  				foreground: 'hsl(var(--stress-foreground))'
+  			},
+  			bio: {
+  				DEFAULT: 'hsl(var(--bio))',
+  				soft: 'hsl(var(--bio-soft))',
+  				foreground: 'hsl(var(--bio-foreground))'
+  			},
   			destructive: {
   				DEFAULT: 'hsl(var(--destructive))',
   				foreground: 'hsl(var(--destructive-foreground))'

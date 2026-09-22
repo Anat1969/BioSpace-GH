@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import heroImg from "@/assets/hero-green-terraces.jpg";
 
 const STATS = [
   { value: "18%", label: "הפחתה בימי מחלה", note: "Ulrich, 1984" },
@@ -19,8 +20,24 @@ export default function HeroSection() {
       {/* ── Warm paper background ── */}
       <div className="absolute inset-0 bg-background" />
 
+      {/* ── Biophilic photograph ── */}
+      <img
+        src={heroImg}
+        alt="אדריכלות ביופילית — מרפסות מדורגות עם צמחייה"
+        fetchPriority="high"
+        decoding="async"
+        className="absolute inset-0 w-full h-full object-cover"
+      />
+
+      {/* ── Readability veil (opaque on the text side, RTL) ── */}
+      <div className="absolute inset-0 bg-gradient-to-l from-background via-background/85 to-background/30 pointer-events-none" />
+      <div className="absolute inset-0 bg-gradient-to-t from-background via-background/45 to-background/20 pointer-events-none" />
+
+      {/* ── Forest tint ── */}
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_90%_80%_at_20%_100%,hsl(var(--primary)/0.28),transparent_65%)] pointer-events-none" />
+
       {/* ── Very subtle warm vignette ── */}
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_120%_80%_at_70%_-20%,hsl(36,30%,93%),transparent_70%)] pointer-events-none" />
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_120%_80%_at_70%_-20%,hsl(36,30%,93%,0.5),transparent_70%)] pointer-events-none" />
 
       {/* ── Single soft light column ── */}
       <div className="absolute top-0 right-[30%] w-px h-full bg-gradient-to-b from-primary/10 via-primary/5 to-transparent pointer-events-none" />

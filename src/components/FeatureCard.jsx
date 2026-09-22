@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 
-export default function FeatureCard({ icon, title, description, index }) {
+export default function FeatureCard({ icon: Icon, title, description, index }) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 32 }}
@@ -17,6 +17,11 @@ export default function FeatureCard({ icon, title, description, index }) {
             {String(index + 1).padStart(2, "0")}
           </span>
           <div className="h-px flex-1 bg-border/60" />
+          {Icon && (
+            <span className="text-accent group-hover:text-primary transition-colors duration-400">
+              <Icon className="w-[18px] h-[18px]" strokeWidth={2} />
+            </span>
+          )}
         </div>
 
         {/* Text */}

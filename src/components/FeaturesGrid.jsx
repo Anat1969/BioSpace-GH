@@ -1,28 +1,32 @@
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import {
+  AlertTriangle, Leaf, Zap, HeartPulse, ArrowUp,
+  Check, Upload, FileCheck, ScanLine,
+} from "lucide-react";
 import FeatureCard from "./FeatureCard";
 
 // ─── 1. Scanner ─────────────────────────────────────────────────────────────
 const SCAN_RESULTS = [
   {
     type: "stress",
-    icon: "⚠️",
+    Icon: AlertTriangle,
     title: "סביבת לחץ זוהתה",
     body: "Warning: Windowless space detected. Cortisol rising, HPA axis activated.",
-    bg: "from-red-950/60 to-amber-950/40",
-    border: "border-amber-700/50",
-    dot: "bg-amber-500",
-    text: "text-amber-300",
+    bg: "bg-stress-soft",
+    border: "border-stress/40",
+    dot: "bg-stress",
+    text: "text-stress-foreground",
   },
   {
     type: "biophilic",
-    icon: "🌿",
+    Icon: Leaf,
     title: "סביבה ביופילית",
     body: "Optimal: Natural light and biophilic elements detected. Parasympathetic system calm.",
-    bg: "from-emerald-950/60 to-teal-950/40",
-    border: "border-emerald-600/50",
-    dot: "bg-emerald-400",
-    text: "text-emerald-300",
+    bg: "bg-bio-soft",
+    border: "border-bio/40",
+    dot: "bg-bio",
+    text: "text-bio-foreground",
   },
 ];
 
@@ -61,8 +65,8 @@ function ScannerCard() {
         {state === "idle" && (
           <motion.button key="btn" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
             onClick={handleScan}
-            className="bg-foreground text-background font-heebo font-medium px-6 py-3 text-sm hover:bg-foreground/85 transition-colors"
-          >סרוק חדר</motion.button>
+            className="inline-flex items-center gap-2 bg-foreground text-background font-heebo font-medium px-6 py-3 text-sm hover:bg-foreground/85 transition-colors"
+          ><ScanLine className="w-4 h-4" strokeWidth={2} /> סרוק חדר</motion.button>
         )}
         {state === "scanning" && (
           <motion.div key="scanning" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="space-y-3">
@@ -74,11 +78,12 @@ function ScannerCard() {
         )}
         {state === "result" && result && (
           <motion.div key="result" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
-            className="border border-border bg-secondary/30 p-5"
+            className={`border ${result.border} ${result.bg} p-5`}
           >
-            <div className="flex items-center gap-2 mb-2">
-              <div className={`w-1.5 h-1.5 rounded-full ${result.type === "stress" ? "bg-foreground/60" : "bg-accent/70"} animate-pulse`} />
-              <span className="font-frank text-base font-bold text-foreground">{result.title}</span>
+            <div className="flex items-center gap-2.5 mb-2">
+              <result.Icon className={`w-4 h-4 ${result.text}`} strokeWidth={2} />
+              <span className={`font-frank text-base font-bold ${result.text}`}>{result.title}</span>
+              <div className={`w-1.5 h-1.5 rounded-full ${result.dot} animate-pulse ml-auto`} />
             </div>
             <p className="text-xs text-muted-foreground font-heebo leading-[1.8] mb-4">{result.body}</p>
             <button onClick={handleReset} className="text-xs text-muted-foreground underline underline-offset-4 decoration-border hover:decoration-muted-foreground hover:text-foreground transition-colors font-heebo">
@@ -94,8 +99,8 @@ function ScannerCard() {
 
 // ─── 2. Body Compass ────────────────────────────────────────────────────────
 const ENV_DATA = {
-  corridor: { hrv: 38, bp: 142, sc: 8.7, label: "מסדרון ללא חלונות", color: "text-amber-400", bg: "bg-amber-500/10 border-amber-700/30" },
-  biophilic: { hrv: 62, bp: 118, sc: 3.2, label: "משרד ביופילי", color: "text-emerald-400", bg: "bg-emerald-500/10 border-emerald-700/30" },
+  corridor: { hrv: 38, bp: 142, sc: 8.7, label: "מסדרון ללא חלונות" },
+  biophilic: { hrv: 62, bp: 118, sc: 3.2, label: "משרד ביופילי" },
 };
 
 function AnimatedNumber({ value, decimals = 0 }) {
@@ -127,7 +132,7 @@ function CompassCard() {
   const data = ENV_DATA[env];
 
   const metrics = [
-    { label: "HRV (ms)", value: data.hrv, decimals: 0 },
+    { label: "HRV (ms)", value: data.hrv, decimals: 0, icon: HeartPulse },
     { label: "לחץ דם סיסטולי", value: data.bp, decimals: 0 },
     { label: "מוליכות עור (μS)", value: data.sc, decimals: 1 },
   ];
@@ -146,25 +151,25 @@ function CompassCard() {
 
       {/* Toggle */}
       <div className="flex items-center gap-3 mb-8 text-sm font-heebo">
-        <span className={env === "corridor" ? "text-foreground font-medium" : "text-muted-foreground"}>מסדרון</span>
+        <span className={env === "corridor" ? "text-stress font-medium" : "text-muted-foreground"}>מסדרון</span>
         <button
           onClick={() => setEnv(e => e === "corridor" ? "biophilic" : "corridor")}
-          className={`relative w-11 h-5 transition-colors duration-400 border overflow-hidden ${env === "biophilic" ? "bg-accent/20 border-accent/30" : "bg-secondary border-border"}`}
+          className={`relative w-11 h-5 transition-colors duration-400 border overflow-hidden ${env === "biophilic" ? "bg-bio/15 border-bio/30" : "bg-stress/10 border-stress/25"}`}
         >
           <motion.div
             animate={{ x: env === "biophilic" ? 2 : 26 }}
             transition={{ type: "spring", stiffness: 500, damping: 30 }}
-            className={`absolute top-0.5 w-3.5 h-3.5 ${env === "biophilic" ? "bg-accent" : "bg-foreground/60"}`}
+            className={`absolute top-0.5 w-3.5 h-3.5 ${env === "biophilic" ? "bg-bio" : "bg-stress"}`}
           />
         </button>
-        <span className={env === "biophilic" ? "text-accent font-medium" : "text-muted-foreground"}>משרד ביופילי</span>
+        <span className={env === "biophilic" ? "text-bio font-medium" : "text-muted-foreground"}>משרד ביופילי</span>
       </div>
 
       {/* Environment label */}
       <div className={`inline-flex items-center gap-2 px-3 py-1 border text-xs font-heebo mb-5 ${
-        env === "biophilic" ? "border-accent/25 bg-accent/5 text-accent" : "border-border bg-secondary/40 text-muted-foreground"
+        env === "biophilic" ? "border-bio/30 bg-bio-soft text-bio-foreground" : "border-stress/30 bg-stress-soft text-stress-foreground"
       }`}>
-        <div className={`w-1.5 h-1.5 ${env === "biophilic" ? "bg-accent" : "bg-foreground/40"} animate-pulse`} />
+        <div className={`w-1.5 h-1.5 ${env === "biophilic" ? "bg-bio" : "bg-stress"} animate-pulse`} />
         {data.label}
       </div>
 
@@ -172,9 +177,10 @@ function CompassCard() {
       <div className="grid grid-cols-3 gap-2 mt-5">
         {metrics.map((m) => (
           <div key={m.label} className="bg-secondary/40 p-3 border border-border/40 text-center">
-            <p className={`font-frank text-xl font-bold tabular-nums ${
-              env === "biophilic" ? "text-accent" : "text-foreground"
+            <p className={`font-frank text-xl font-bold tabular-nums flex items-center justify-center gap-1 ${
+              env === "biophilic" ? "text-bio" : "text-stress"
             }`}>
+              {m.icon && <m.icon className="w-3.5 h-3.5 opacity-70" strokeWidth={2} />}
               <AnimatedNumber value={m.value} decimals={m.decimals} />
             </p>
             <p className="text-[10px] text-muted-foreground font-heebo mt-1 leading-tight">{m.label}</p>
@@ -330,8 +336,8 @@ function ROICard() {
 
 // ─── 5. Demographic Vulnerability Map ───────────────────────────────────────
 const DEMO_DATA = {
-  male:   { label: "גבר",  cortisol: 38, color: "text-amber-400",   bar: "bg-amber-500",   desc: "רמת קורטיזול בסיסית מוגברת בסביבה נטולת ירוק." },
-  female: { label: "אישה", cortisol: 74, color: "text-red-400",     bar: "bg-red-500",     desc: "נשים מציגות תגובת HPA מוגברת משמעותית באותה סביבה." },
+  male:   { label: "גבר",  cortisol: 38, bar: "bg-stress/50", desc: "רמת קורטיזול בסיסית מוגברת בסביבה נטולת ירוק." },
+  female: { label: "אישה", cortisol: 74, bar: "bg-stress",    desc: "נשים מציגות תגובת HPA מוגברת משמעותית באותה סביבה." },
 };
 
 function DemographicCard() {
@@ -367,14 +373,15 @@ function DemographicCard() {
         <div className="flex justify-between items-center mb-3">
           <span className="text-xs text-muted-foreground font-heebo">קורטיזול בסיסי מדומה</span>
           <motion.span key={data.cortisol} initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-            className="font-frank text-2xl font-bold text-foreground"
+            className="font-frank text-2xl font-bold text-stress flex items-center gap-1"
           >
+            {gender === "female" && <ArrowUp className="w-4 h-4" strokeWidth={2.5} />}
             {data.cortisol} nmol/L
           </motion.span>
         </div>
-        <div className="h-px w-full bg-border overflow-hidden">
+        <div className="h-1.5 w-full bg-border/60 overflow-hidden">
           <motion.div animate={{ width: `${data.cortisol}%` }} transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
-            className={`h-full ${gender === "female" ? "bg-foreground/70" : "bg-foreground/35"}`}
+            className={`h-full ${data.bar}`}
           />
         </div>
       </div>
@@ -429,8 +436,8 @@ function BrainTimelineCard() {
   const phase = PHASES[envType][sliderVal];
 
   return (
-    <div className={`relative p-9 md:p-10 col-span-1 md:col-span-2 border-t border-b border-border transition-all duration-400 bg-background ${
-      isSevere ? "bg-red-50/60" : ""
+    <div className={`relative p-9 md:p-10 col-span-1 md:col-span-2 border-t border-b transition-all duration-400 ${
+      isSevere ? "bg-stress-soft/60 border-stress/30" : "bg-background border-border"
     }`}>
       <div className="relative z-10">
         <div className="flex items-center gap-3 mb-8">
@@ -446,14 +453,15 @@ function BrainTimelineCard() {
         <div className="flex items-center gap-3 mb-10 text-sm font-heebo">
           {["biophilic", "windowless"].map(e => (
             <button key={e} onClick={() => setEnvType(e)}
-              className={`px-5 py-2.5 border text-sm transition-all duration-300 ${
+              className={`px-5 py-2.5 border text-sm transition-all duration-300 flex items-center gap-2 ${
                 envType === e
                   ? e === "biophilic"
-                    ? "border-accent/30 bg-accent/5 text-accent"
-                    : "border-foreground/20 bg-secondary text-foreground"
+                    ? "border-bio/40 bg-bio-soft text-bio-foreground"
+                    : "border-stress/40 bg-stress-soft text-stress-foreground"
                   : "border-border text-muted-foreground hover:border-foreground/20"
               }`}
             >
+              {e === "biophilic" ? <Leaf className="w-3.5 h-3.5" strokeWidth={2} /> : <AlertTriangle className="w-3.5 h-3.5" strokeWidth={2} />}
               {e === "biophilic" ? "ביופילי" : "חדר ללא חלונות"}
             </button>
           ))}
@@ -465,33 +473,33 @@ function BrainTimelineCard() {
           </div>
           <input type="range" min="0" max="6" step="1" value={sliderVal}
             onChange={e => setSliderVal(Number(e.target.value))}
-            className="w-full accent-foreground cursor-pointer"
+            className={`w-full cursor-pointer ${envType === "biophilic" ? "accent-bio" : "accent-stress"}`}
           />
         </div>
 
         <AnimatePresence mode="wait">
           {isSevere ? (
             <motion.div key="severe" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
-              className="border border-foreground/20 bg-secondary/60 p-6"
+              className="border border-stress/40 bg-stress-soft p-6"
             >
               <div className="flex items-center gap-2 mb-3">
-                <div className="w-1.5 h-1.5 bg-foreground/60 animate-pulse" />
-                <span className="text-[10px] tracking-[0.3em] text-foreground/50 font-heebo uppercase">אזהרה קלינית</span>
+                <AlertTriangle className="w-3.5 h-3.5 text-stress animate-pulse" strokeWidth={2.5} />
+                <span className="text-[10px] tracking-[0.3em] text-stress-foreground font-heebo uppercase">אזהרה קלינית</span>
               </div>
-              <p className="font-frank text-lg text-foreground leading-relaxed">
+              <p className="font-frank text-lg text-stress-foreground leading-relaxed">
                 אזהרה: חשיפה כרונית לסטרס סביבתי משנה את הארכיטקטורה המוחית. גלוקוקורטיקואידים פוגעים כעת בהיפוקמפוס, באמיגדלה ובקורטקס הפרה-פרונטלי.
               </p>
             </motion.div>
           ) : (
             <motion.div key={`${envType}-${sliderVal}`} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
               className={`border p-6 ${
-                envType === "biophilic" ? "border-accent/25 bg-accent/[0.04]" : "border-border bg-secondary/30"
+                envType === "biophilic" ? "border-bio/25 bg-bio-soft/50" : "border-stress/25 bg-stress-soft/50"
               }`}
             >
               <div className="flex items-center gap-2 mb-2">
-                <div className={`w-1.5 h-1.5 animate-pulse ${envType === "biophilic" ? "bg-accent" : "bg-foreground/40"}`} />
+                <div className={`w-1.5 h-1.5 animate-pulse ${envType === "biophilic" ? "bg-bio" : "bg-stress"}`} />
                 <span className={`text-[10px] font-heebo font-medium tracking-wider ${
-                  envType === "biophilic" ? "text-accent/70" : "text-muted-foreground"
+                  envType === "biophilic" ? "text-bio-foreground" : "text-stress-foreground"
                 }`}>{TIMELINE_LABELS[sliderVal]}</span>
               </div>
               <p className="font-heebo text-sm leading-[1.9] text-foreground/75 font-light">{phase}</p>
@@ -570,15 +578,19 @@ function BlueprintCard() {
               }`}
             >
               <input type="file" className="hidden" accept=".pdf,.dwg,.png,.jpg" onChange={handleFileInput} />
-              <div className={`w-8 h-8 border flex items-center justify-center transition-colors ${
-                fileName ? "border-accent/40" : "border-border"
+              <div className={`w-9 h-9 border flex items-center justify-center transition-colors ${
+                fileName ? "border-bio/50 text-bio" : "border-border text-muted-foreground"
               }`}>
-                <span className="text-sm">{fileName ? "↓" : "↑"}</span>
+                {fileName ? <FileCheck className="w-4 h-4" strokeWidth={2} /> : <Upload className="w-4 h-4" strokeWidth={2} />}
               </div>
               <span className="text-xs font-heebo text-muted-foreground text-center">
                 {fileName ? fileName : "גרור קובץ לכאן — PDF, DWG, PNG"}
               </span>
-              {fileName && <span className="text-[10px] text-accent font-heebo tracking-wider">✓ קובץ נטען</span>}
+              {fileName && (
+                <span className="inline-flex items-center gap-1 text-[10px] text-bio font-heebo tracking-wider">
+                  <Check className="w-3 h-3" strokeWidth={3} /> קובץ נטען
+                </span>
+              )}
             </label>
           </div>
 
@@ -708,7 +720,7 @@ export default function FeaturesGrid() {
           <div className="bg-background"><TimerCard /></div>
           <div className="bg-background">
             <FeatureCard
-              icon="⚡"
+              icon={Zap}
               title="אתגר השעה"
               description='שאל את עצמך: ״מה החדר הזה אומר לגוף שלי?״ — משימות יומיות שמחדדות את המודעות הסביבתית שלך.'
               index={3}

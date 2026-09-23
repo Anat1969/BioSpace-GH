@@ -24,7 +24,6 @@ export default function HeroSection() {
       <img
         src={heroImg}
         alt="אדריכלות ביופילית — מרפסות מדורגות עם צמחייה"
-        fetchPriority="high"
         decoding="async"
         className="absolute inset-0 w-full h-full object-cover"
       />

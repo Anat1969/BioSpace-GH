@@ -1,37 +1,71 @@
-import { motion } from "framer-motion";
+import { useState, useEffect, useRef } from "react";
+import { motion, useReducedMotion } from "framer-motion";
 
 const FINDINGS = [
   {
     index: "01",
     category: "Environmental Health",
-    stat: "18%",
+    prefix: "", num: 18, suffix: "%", decimals: 0,
     label: "הפחתה בימי מחלה",
     body: "סביבות עבודה עם חשיפה לאור יום טבעי מפחיתות את שיעורי ההיעדרות עקב מחלה באופן מובהק סטטיסטית.",
     source: "Heschong, R. et al. (2003). Daylight in Schools",
     bar: 72,
-    color: "bg-primary/70",
+    tone: "bio",
   },
   {
     index: "02",
     category: "Neuroendocrinology",
-    stat: "↓34%",
+    prefix: "↓", num: 34, suffix: "%", decimals: 0,
     label: "ירידת קורטיזול בסביבה ביופילית",
     body: "חשיפה לנוף טבעי, אפילו דרך חלון, מורידה ריכוזי קורטיזול ומדדי סטרס פיזיולוגיים תוך דקות.",
     source: "Ulrich, R.S. (1984). Science, 224(4647)",
     bar: 55,
-    color: "bg-accent/70",
+    tone: "accent",
   },
   {
     index: "03",
     category: "Gender & Space",
-    stat: "×2.1",
+    prefix: "×", num: 2.1, suffix: "", decimals: 1,
     label: "פגיעות מוגברת בנשים בסביבה נטולת טבע",
     body: "נשים בשכונות דלות בירוק מציגות רמות קורטיזול ורמות דיכאון גבוהות פי שניים מגברים באותן סביבות.",
     source: "Roe, J. et al. (2013). Edinburgh University",
     bar: 88,
-    color: "bg-foreground/40",
+    tone: "stress",
   },
 ];
+
+// Count-up number that animates once when scrolled into view.
+function CountUpStat({ prefix = "", num, suffix = "", decimals = 0, tone }) {
+  const [n, setN] = useState(0);
+  const raf = useRef();
+  const reduce = useReducedMotion();
+
+  const run = () => {
+    if (reduce) { setN(num); return; }
+    const t0 = performance.now();
+    const dur = 1400;
+    const step = (now) => {
+      const p = Math.min((now - t0) / dur, 1);
+      const eased = 1 - Math.pow(1 - p, 3);
+      setN(parseFloat((num * eased).toFixed(decimals)));
+      if (p < 1) raf.current = requestAnimationFrame(step);
+    };
+    raf.current = requestAnimationFrame(step);
+  };
+
+  useEffect(() => () => cancelAnimationFrame(raf.current), []);
+
+  return (
+    <motion.span
+      onViewportEnter={run}
+      viewport={{ once: true, margin: "-40px" }}
+      className="font-frank text-5xl md:text-6xl font-bold tabular-nums leading-none"
+      style={{ color: `hsl(var(--${tone}))` }}
+    >
+      {prefix}{n.toLocaleString("he-IL")}{suffix}
+    </motion.span>
+  );
+}
 
 export default function ScientificBanner() {
   return (
@@ -80,18 +114,19 @@ export default function ScientificBanner() {
               {/* Stat + bar */}
               <div>
                 <div className="flex items-baseline gap-3 mb-2">
-                  <span className="font-frank text-5xl md:text-6xl font-bold text-foreground tabular-nums leading-none">{f.stat}</span>
+                  <CountUpStat prefix={f.prefix} num={f.num} suffix={f.suffix} decimals={f.decimals} tone={f.tone} />
                 </div>
                 <p className="font-heebo text-sm text-foreground/70 mb-5">{f.label}</p>
 
                 {/* Progress bar */}
-                <div className="h-[2px] w-full bg-border overflow-hidden">
+                <div className="h-1.5 w-full bg-border/60 overflow-hidden">
                   <motion.div
                     initial={{ width: 0 }}
                     whileInView={{ width: `${f.bar}%` }}
                     viewport={{ once: true }}
                     transition={{ duration: 1.2, delay: 0.3 + i * 0.1, ease: [0.22, 1, 0.36, 1] }}
-                    className={`h-full ${f.color}`}
+                    className="h-full"
+                    style={{ background: `hsl(var(--${f.tone}))` }}
                   />
                 </div>
               </div>

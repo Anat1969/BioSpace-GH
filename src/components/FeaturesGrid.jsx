@@ -5,6 +5,9 @@ import {
   Check, Upload, FileCheck, ScanLine,
 } from "lucide-react";
 import FeatureCard from "./FeatureCard";
+import RadialGauge from "./charts/RadialGauge";
+import ExposureChart from "./charts/ExposureChart";
+import ComparisonBars from "./charts/ComparisonBars";
 
 // ─── 1. Scanner ─────────────────────────────────────────────────────────────
 const SCAN_RESULTS = [
@@ -132,7 +135,7 @@ function CompassCard() {
   const data = ENV_DATA[env];
 
   const metrics = [
-    { label: "HRV (ms)", value: data.hrv, decimals: 0, icon: HeartPulse },
+    { label: "HRV (ms)", value: data.hrv, decimals: 0 },
     { label: "לחץ דם סיסטולי", value: data.bp, decimals: 0 },
     { label: "מוליכות עור (μS)", value: data.sc, decimals: 1 },
   ];
@@ -144,7 +147,9 @@ function CompassCard() {
         <div className="h-px flex-1 bg-border/60" />
         <span className="text-[9px] tracking-[0.3em] text-muted-foreground/40 font-heebo uppercase">Body Compass</span>
       </div>
-      <h3 className="font-frank text-xl md:text-2xl font-bold text-foreground mb-3">מצפן גופני</h3>
+      <h3 className="font-frank text-xl md:text-2xl font-bold text-foreground mb-3 flex items-center gap-2">
+        <HeartPulse className="w-5 h-5 text-accent" strokeWidth={2} /> מצפן גופני
+      </h3>
       <p className="font-heebo text-sm text-muted-foreground leading-[1.8] mb-8 font-light">
         ניטור HRV ותגובת ציר ה-HPA בזמן אמת.
       </p>
@@ -173,19 +178,23 @@ function CompassCard() {
         {data.label}
       </div>
 
-      {/* Metrics */}
-      <div className="grid grid-cols-3 gap-2 mt-5">
-        {metrics.map((m) => (
-          <div key={m.label} className="bg-secondary/40 p-3 border border-border/40 text-center">
-            <p className={`font-frank text-xl font-bold tabular-nums flex items-center justify-center gap-1 ${
-              env === "biophilic" ? "text-bio" : "text-stress"
-            }`}>
-              {m.icon && <m.icon className="w-3.5 h-3.5 opacity-70" strokeWidth={2} />}
-              <AnimatedNumber value={m.value} decimals={m.decimals} />
-            </p>
-            <p className="text-[10px] text-muted-foreground font-heebo mt-1 leading-tight">{m.label}</p>
-          </div>
-        ))}
+      {/* Metrics: HRV gauge + two tiles */}
+      <div className="flex items-center gap-5 mt-5">
+        <RadialGauge value={data.hrv} min={20} max={80} tone={env === "biophilic" ? "bio" : "stress"} unit="HRV · ms">
+          <AnimatedNumber value={data.hrv} />
+        </RadialGauge>
+        <div className="flex-1 grid grid-cols-1 gap-2">
+          {metrics.slice(1).map((m) => (
+            <div key={m.label} className="bg-secondary/40 px-3 py-2.5 border border-border/40 text-center">
+              <p className={`font-frank text-lg font-bold tabular-nums ${
+                env === "biophilic" ? "text-bio" : "text-stress"
+              }`}>
+                <AnimatedNumber value={m.value} decimals={m.decimals} />
+              </p>
+              <p className="text-[10px] text-muted-foreground font-heebo mt-0.5 leading-tight">{m.label}</p>
+            </div>
+          ))}
+        </div>
       </div>
       <div className="absolute bottom-0 left-0 w-8 h-px bg-accent/50" />
     </div>
@@ -370,20 +379,22 @@ function DemographicCard() {
       </div>
 
       <div className="mb-4">
-        <div className="flex justify-between items-center mb-3">
-          <span className="text-xs text-muted-foreground font-heebo">קורטיזול בסיסי מדומה</span>
+        <div className="flex justify-between items-center mb-4">
+          <span className="text-xs text-muted-foreground font-heebo">קורטיזול בסיסי מדומה (nmol/L)</span>
           <motion.span key={data.cortisol} initial={{ opacity: 0 }} animate={{ opacity: 1 }}
             className="font-frank text-2xl font-bold text-stress flex items-center gap-1"
           >
             {gender === "female" && <ArrowUp className="w-4 h-4" strokeWidth={2.5} />}
-            {data.cortisol} nmol/L
+            {data.cortisol}
           </motion.span>
         </div>
-        <div className="h-1.5 w-full bg-border/60 overflow-hidden">
-          <motion.div animate={{ width: `${data.cortisol}%` }} transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
-            className={`h-full ${data.bar}`}
-          />
-        </div>
+        <ComparisonBars
+          max={90}
+          items={[
+            { label: DEMO_DATA.female.label, value: DEMO_DATA.female.cortisol, tone: "stress", active: gender === "female" },
+            { label: DEMO_DATA.male.label, value: DEMO_DATA.male.cortisol, tone: "stress", active: gender === "male" },
+          ]}
+        />
       </div>
 
       <AnimatePresence mode="wait">
@@ -428,6 +439,12 @@ const PHASES = {
   ],
 };
 
+// Simulated "brain integrity" index (0–100) across the timeline.
+const INTEGRITY = {
+  biophilic: [55, 61, 68, 75, 82, 90, 97],
+  windowless: [52, 45, 37, 29, 21, 12, 4],
+};
+
 function BrainTimelineCard() {
   const [sliderVal, setSliderVal] = useState(0);
   const [envType, setEnvType] = useState("biophilic");
@@ -465,6 +482,22 @@ function BrainTimelineCard() {
               {e === "biophilic" ? "ביופילי" : "חדר ללא חלונות"}
             </button>
           ))}
+        </div>
+
+        {/* Exposure chart */}
+        <div className="mb-6 border border-border/60 bg-secondary/20 p-4">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-[9px] tracking-[0.3em] text-muted-foreground/50 font-heebo uppercase">Brain Integrity Index</span>
+            <span className={`font-frank text-sm font-bold tabular-nums ${envType === "biophilic" ? "text-bio" : "text-stress"}`}>
+              {INTEGRITY[envType][sliderVal]}<span className="text-muted-foreground/50 text-[10px]"> / 100</span>
+            </span>
+          </div>
+          <ExposureChart
+            biophilic={INTEGRITY.biophilic}
+            windowless={INTEGRITY.windowless}
+            activeType={envType}
+            activeIndex={sliderVal}
+          />
         </div>
 
         <div className="mb-6">

@@ -182,3 +182,32 @@
   }
   html { scroll-behavior: auto; }
 }
+
+/* ── A4 report sheet ── */
+.a4-sheet {
+  width: 210mm;
+  min-height: 297mm;
+  padding: 14mm;
+  box-sizing: border-box;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+
+@media print {
+  @page { size: A4; margin: 0; }
+  html, body { background: #fff !important; }
+  body * { visibility: hidden !important; }
+  .a4-report-overlay, .a4-report-overlay * { visibility: visible !important; }
+  .a4-report-overlay {
+    position: absolute !important;
+    inset: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    background: #fff !important;
+    backdrop-filter: none !important;
+    display: block !important;
+    overflow: visible !important;
+  }
+  .report-toolbar { display: none !important; }
+  .a4-sheet { box-shadow: none !important; margin: 0 auto !important; }
+}

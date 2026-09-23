@@ -7,8 +7,8 @@ import {
   ROICard,
   DemographicCard,
   BrainTimelineCard,
-  BlueprintCard,
 } from "../components/FeaturesGrid";
+import BlueprintCard from "../components/BlueprintCard";
 import FeatureCard from "../components/FeatureCard";
 import FindingsList from "../components/FindingsList";
 import StorySection, { ModuleGrid, ModuleCell } from "../components/StorySection";

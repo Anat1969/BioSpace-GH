@@ -1,5 +1,8 @@
-import { motion } from "framer-motion";
+import { lazy, Suspense, useEffect, useRef, useState } from "react";
+import { motion, useScroll, useTransform, useReducedMotion } from "framer-motion";
 import heroImg from "@/assets/hero-green-terraces.jpg";
+
+const HeroCanvas = lazy(() => import("./HeroCanvas"));
 
 const STATS = [
   { value: "18%", label: "הפחתה בימי מחלה", note: "Ulrich, 1984" },
@@ -14,19 +17,38 @@ const fadeUp = (delay = 0) => ({
 });
 
 export default function HeroSection() {
+  const reduce = useReducedMotion();
+  const sectionRef = useRef(null);
+  const [showCanvas, setShowCanvas] = useState(false);
+
+  // Parallax: image drifts slightly slower than scroll.
+  const { scrollYProgress } = useScroll({ target: sectionRef, offset: ["start start", "end start"] });
+  const imgY = useTransform(scrollYProgress, [0, 1], reduce ? ["0%", "0%"] : ["0%", "14%"]);
+
+  // Mount the three.js layer only after first paint, and never under reduced motion.
+  useEffect(() => {
+    if (reduce) return;
+    const id = setTimeout(() => setShowCanvas(true), 600);
+    return () => clearTimeout(id);
+  }, [reduce]);
+
   return (
-    <section className="relative min-h-screen flex flex-col justify-center overflow-hidden" dir="rtl">
+    <section ref={sectionRef} className="relative min-h-screen flex flex-col justify-center overflow-hidden" dir="rtl">
 
       {/* ── Warm paper background ── */}
       <div className="absolute inset-0 bg-background" />
 
-      {/* ── Biophilic photograph ── */}
-      <img
+      {/* ── Biophilic photograph (parallax) ── */}
+      <motion.img
         src={heroImg}
         alt="אדריכלות ביופילית — מרפסות מדורגות עם צמחייה"
         decoding="async"
-        className="absolute inset-0 w-full h-full object-cover"
+        style={{ y: imgY }}
+        className="absolute inset-0 w-full h-[118%] -top-[4%] object-cover"
       />
+
+      {/* ── Living gradient mesh ── */}
+      <div className="absolute inset-0 pointer-events-none opacity-60 animate-mesh-drift bg-[radial-gradient(40%_50%_at_18%_30%,hsl(var(--bio)/0.20),transparent_70%),radial-gradient(45%_55%_at_80%_75%,hsl(var(--primary)/0.18),transparent_70%)]" />
 
       {/* ── Readability veil (opaque on the text side, RTL) ── */}
       <div className="absolute inset-0 bg-gradient-to-l from-background via-background/85 to-background/30 pointer-events-none" />
@@ -35,8 +57,20 @@ export default function HeroSection() {
       {/* ── Forest tint ── */}
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_90%_80%_at_20%_100%,hsl(var(--primary)/0.28),transparent_65%)] pointer-events-none" />
 
+      {/* ── 3D wireframe structure (lazy, gated) ── */}
+      {showCanvas && (
+        <div className="absolute inset-0 z-[6] opacity-45 mix-blend-multiply pointer-events-none">
+          <Suspense fallback={null}>
+            <HeroCanvas />
+          </Suspense>
+        </div>
+      )}
+
       {/* ── Very subtle warm vignette ── */}
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_120%_80%_at_70%_-20%,hsl(36,30%,93%,0.5),transparent_70%)] pointer-events-none" />
+
+      {/* ── Moving light beam (uses the beam-drift keyframe) ── */}
+      <div className="absolute top-0 right-[28%] h-full w-32 md:w-44 blur-2xl animate-beam-drift bg-gradient-to-b from-primary/15 via-accent/8 to-transparent pointer-events-none" />
 
       {/* ── Single soft light column ── */}
       <div className="absolute top-0 right-[30%] w-px h-full bg-gradient-to-b from-primary/10 via-primary/5 to-transparent pointer-events-none" />

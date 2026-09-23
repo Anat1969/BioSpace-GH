@@ -71,7 +71,10 @@ export default function ScientificBanner() {
   return (
     <section className="relative py-28 md:py-40 overflow-hidden border-t border-border" dir="rtl">
 
-      <div className="max-w-6xl mx-auto px-8 md:px-20">
+      {/* Living gradient mesh */}
+      <div className="absolute inset-0 pointer-events-none opacity-70 animate-mesh-drift bg-[radial-gradient(35%_45%_at_15%_20%,hsl(var(--bio)/0.10),transparent_70%),radial-gradient(40%_50%_at_85%_80%,hsl(var(--accent)/0.10),transparent_70%)]" />
+
+      <div className="relative z-10 max-w-6xl mx-auto px-8 md:px-20">
 
         {/* Section header */}
         <motion.div

@@ -1,3 +1,4 @@
+import { createPortal } from "react-dom";
 import { Printer, X, CheckCircle2, AlertTriangle, MinusCircle } from "lucide-react";
 import { PARAMETERS } from "../lib/analyzeBlueprint";
 
@@ -27,7 +28,7 @@ export default function BlueprintReport({ report, imageUrl, buildingType, onClos
   const params = Array.isArray(report.parameters) ? report.parameters : [];
   const model = report?._meta?.model || "";
 
-  return (
+  return createPortal(
     <div
       className="a4-report-overlay fixed inset-0 z-[100] overflow-auto bg-foreground/40 backdrop-blur-sm flex flex-col items-center py-8 px-4"
       dir="rtl"
@@ -169,6 +170,7 @@ export default function BlueprintReport({ report, imageUrl, buildingType, onClos
           <span>BioSpace — Architectural Endocrinology</span>
         </footer>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

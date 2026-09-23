@@ -125,10 +125,10 @@ export default function BlueprintCard() {
           <div className="h-px flex-1 bg-border/60" />
           <span className="text-[10px] tracking-[0.3em] text-muted-foreground/50 font-heebo uppercase">Blueprint Analysis</span>
         </div>
-        <h3 className="font-frank text-2xl md:text-3xl font-bold text-foreground mb-3">ניתוח שרטוט ותעודת ביופרופיל הורמונלי</h3>
+        <h3 className="font-frank text-2xl md:text-3xl font-bold text-foreground mb-3">ניתוח שרטוט — מדד תכנון ביופילי וצירקדי</h3>
         <p className="font-heebo text-sm text-muted-foreground leading-[1.8] mb-8 max-w-2xl font-light">
-          העלי תמונה או PDF של שרטוט אדריכלי — והמערכת תפיק <span className="text-foreground/80">דוח אמיתי ומובנה</span> על עמוד A4:
-          ציוני פרמטרים סביבתיים, פרשנות פיזיולוגית והמלצות, מנותחים על ידי Claude Vision.
+          העלי תמונה או PDF של שרטוט אדריכלי — והמערכת תפיק <span className="text-foreground/80">דוח סינון תכנוני מובנה</span> על עמוד A4:
+          ממצאי קריאת השרטוט, 7 פרמטרים משוקללים עם רמות ודאות, פרשנות זהירה והמלצות. כלי מבוסס-מחקר, לא מדידה רפואית.
         </p>
 
         {/* API key */}
@@ -235,7 +235,7 @@ export default function BlueprintCard() {
             >
               <span className="inline-flex items-center gap-2 font-heebo text-sm text-bio-foreground">
                 <FileCheck className="w-4 h-4 text-bio" strokeWidth={2} />
-                הדוח הופק — ציון כולל {report.overallScore}/100 · {report.verdictLabel}
+                הדוח הופק — ציון BCDA {report.overallScore}/100 · {report.bandLabel}
               </span>
               <button onClick={() => setReportOpen(true)} className="text-sm font-heebo text-foreground underline underline-offset-4 decoration-border hover:decoration-foreground transition-colors">
                 פתח דוח A4

@@ -1,24 +1,47 @@
-// Client-side Claude (vision) call that analyzes an uploaded architectural
-// blueprint and returns a structured "architectural endocrinology" report.
+// Client-side Claude (vision) call that screens an uploaded architectural plan
+// and returns a transparent, research-based "Biophilic & Circadian Design
+// Assessment" (BCDA). This is a PLANNING screening tool — not a medical or
+// physiological measurement. Scores reflect only what can be inferred from a
+// 2D plan; the overall score is computed in code from fixed weights so it is
+// reproducible and defensible (not a number the model "chose").
 //
 // Runs entirely in the browser against the Anthropic Messages API using the
-// visitor's OWN API key (stored locally, never embedded in this repo). This
-// keeps the app fully static and independent of any backend.
+// visitor's OWN API key (stored locally, never embedded in this repo).
 
 const ANTHROPIC_URL = "https://api.anthropic.com/v1/messages";
 const ANTHROPIC_VERSION = "2023-06-01";
 
-// The fixed assessment parameters — a credible biophilic / environmental-
-// endocrine rubric. The model scores each one from what the plan reveals.
+// Fixed rubric. weights sum to 100. Each parameter states what is measured and,
+// crucially, what can and cannot be concluded from a plan alone.
 export const PARAMETERS = [
-  { key: "daylight",    name: "אור טבעי וחשיפה לאור יום" },
-  { key: "views",       name: "קשר חזותי לטבע ולנוף" },
-  { key: "ventilation", name: "אוורור טבעי ואיכות אוויר" },
-  { key: "greenery",    name: "צמחייה ואלמנטים ביופיליים" },
-  { key: "materials",   name: "חומרים טבעיים ומרקמים" },
-  { key: "spatial",     name: "ארגון מרחבי — פרוספקט ומחסה" },
-  { key: "circadian",   name: "מקצב יממה ותאורה" },
-  { key: "acoustics",   name: "אקוסטיקה ושקט" },
+  { key: "daylight", name: "גישה לאור יום", weight: 22,
+    measured: "עומק חדרים מהחזית, שטח פתחים, שיעור ליבה מוארת",
+    inferable: "ניתן להעריך פוטנציאל אור יום; לא ניתן למדוד עוצמה (lux) מתוכנית",
+    source: "CIE / EN 17037" },
+  { key: "ventilation", name: "אוורור טבעי", weight: 18,
+    measured: "פתחים בקירות מנוגדים (אוורור צולב) מול חד-כיווני",
+    inferable: "ניתן להעריך מסלולי אוויר; לא ניתן למדוד איכות אוויר בפועל",
+    source: "WHO Housing & Health" },
+  { key: "circadian", name: "פוטנציאל צירקדי", weight: 16,
+    measured: "שיעור השטח המאויש עם גישה לאור יום מול ליבה מלאכותית",
+    inferable: "פוטנציאל בלבד; melanopic EDI אינו נמדד מתוכנית",
+    source: "CIE Integrative Lighting" },
+  { key: "views", name: "קשר חזותי לטבע", weight: 14,
+    measured: "כיווני חלונות אל חוץ / חצר / צמחייה",
+    inferable: "נוכחות או היעדר בלבד; איכות הנוף אינה ניתנת להערכה",
+    source: "פסיכולוגיה סביבתית (Ulrich)" },
+  { key: "greenery", name: "צמחייה וחצרות", weight: 12,
+    measured: "חצרות פנימיות, אטריום, סימוני נטיעה",
+    inferable: "אם לא סומן בתוכנית — לא ניתן להסיק",
+    source: "עקרונות עיצוב ביופילי" },
+  { key: "spatial", name: "ארגון מרחבי (עיקרון תכנוני)", weight: 10,
+    measured: "הפרדת יום/לילה, בהירות תנועה, פרוספקט-מחסה",
+    inferable: "עיקרון תכנוני איכותני; אינו מדד פיזיולוגי מוכח",
+    source: "תיאוריה סביבתית (לא כמותי)" },
+  { key: "orientation", name: "אוריינטציה סולרית", weight: 8,
+    measured: "סימון צפון וכיווני החזיתות העיקריות",
+    inferable: "ללא סימון צפון — ההערכה בעלת ודאות נמוכה",
+    source: "עקרונות תכנון פסיבי" },
 ];
 
 export const MODELS = [
@@ -26,72 +49,88 @@ export const MODELS = [
   { id: "claude-sonnet-5", label: "Sonnet 5 — מהיר וחסכוני" },
 ];
 
-const paramList = PARAMETERS.map((p) => `  - "${p.key}": ${p.name}`).join("\n");
+const paramSpec = PARAMETERS.map(
+  (p) => `  - "${p.key}" (${p.name}, משקל ${p.weight}%): נמדד — ${p.measured}. ניתן להסיק — ${p.inferable}.`
+).join("\n");
 
 function systemPrompt() {
-  return `אתה בודק מוסמך ל"אנדוקרינולוגיה אדריכלית" (Architectural Endocrinology) — תחום המעריך כיצד סביבה בנויה משפיעה על מערכת העצבים, ציר ה-HPA, רמות הקורטיזול והמקצב הcircadian של המשתמשים בה.
+  return `אתה יועץ תכנון סביבתי שמבצע הערכת סינון של תוכנית אדריכלית לפי מתודולוגיית BioSpace: "מדד תכנון ביופילי וצירקדי" (Biophilic & Circadian Design Assessment). זהו כלי סינון תכנוני מבוסס-מחקר — לא מדידה רפואית או פיזיולוגית.
 
-קיבלת שרטוט/תוכנית אדריכלית של מבנה. נתח אותה בקפדנות ובכנות, אך ורק על סמך מה שנראה בשרטוט (פתחים, חלונות, עומק חדרים, אוריינטציה אם מסומנת, חצרות, פטיו, סימוני צמחייה, יחסי מסה-חלל, מסדרונות). כאשר מידע חסר בשרטוט — ציין זאת במפורש והורד ודאות, אל תמציא נתונים.
+חוקי אמינות מחייבים:
+1. נתח אך ורק את מה שנראה בתוכנית. הוכח שקראת אותה: מלא סעיף observations עם ממצאים קונקרטיים (חדרים שזוהו, פתחים ומיקומם, סימון צפון, קנה מידה, מצב הליבה, סוג אוורור, צמחייה). אם פרט אינו מסומן/לא קריא — כתוב זאת מפורשות.
+2. שפה מדעית זהירה. אסור לקבוע רמות קורטיזול, "איזון הורמונלי" או תגובה פיזיולוגית מתוך תוכנית. השתמש ב"משפיע על"/"מזוהה עם"/"פוטנציאל", והבהר שלא ניתן להסיק ערכים הורמונליים מתוכנית בלבד.
+3. פרוספקט-מחסה הוא עיקרון תכנוני איכותני, לא מדד פיזיולוגי — התייחס אליו ככזה.
+4. תן ציון 0-100 לכל אחד מ-7 הפרמטרים, לפי מה שניתן להסיק מהתוכנית, עם רמת ודאות (high/medium/low) וממצא ספציפי המנמק את הציון מתוך השרטוט הזה. אל תנפח ציונים.
 
-החזר אך ורק אובייקט JSON תקין (בלי טקסט לפני/אחרי, בלי גדרות markdown, בלי תגיות XML) במבנה המדויק הבא:
+החזר אך ורק אובייקט JSON תקין (בלי טקסט/markdown/תגיות מסביב) במבנה:
 
 {
-  "planSummary": "משפט-שניים בעברית שמתארים מה מראה השרטוט (סוג, חדרים עיקריים, פתחים, אוריינטציה).",
-  "overallScore": <מספר שלם 0-100>,
-  "verdict": "certified" | "conditional" | "not_certified",
-  "verdictLabel": "עומד בתקן" | "עומד בתנאים" | "לא עומד בתקן",
-  "hpaImpact": "משפט קצר על ההשפעה הצפויה על ציר ה-HPA/קורטיזול (מיטיב/ניטרלי/מלחיץ ולמה).",
+  "planType": "סוג התוכנית (למשל: תוכנית קומה למגורים).",
+  "readability": "high" | "medium" | "low",
+  "observations": {
+    "rooms": "חדרים/אזורים עיקריים שזוהו.",
+    "openings": "פתחים/חלונות שזוהו והחזיתות שבהן.",
+    "orientation": "האם קיים סימון צפון (אם לא — ציין).",
+    "scale": "האם קיים קנה מידה/מידות (אם לא — ציין).",
+    "core": "מצב הליבה הפנימית — מוארת או תלויה בתאורה מלאכותית.",
+    "ventilation": "cross | single-sided | unclear — עם נימוק קצר.",
+    "greenery": "האם סומנה צמחייה/חצר/אטריום (אם לא — ציין)."
+  },
   "parameters": [
-    { "key": "<אחד המפתחות למטה>", "score": <0-100>, "impact": "positive" | "neutral" | "negative", "finding": "ממצא קצר (עד ~18 מילים) המנמק את הציון על סמך השרטוט." }
+    { "key": "<אחד מהמפתחות למטה>", "score": <0-100>, "confidence": "high"|"medium"|"low", "finding": "ממצא קצר (עד ~16 מילים) המעוגן בשרטוט." }
   ],
-  "interpretation": "פסקה אחת מרוכזת (3-5 משפטים) המפרשת את ההשפעה הפיזיולוגית הכוללת של השרטוט.",
-  "recommendations": ["המלצה 1", "המלצה 2", "המלצה 3"],
+  "interpretation": "פסקה זהירה אחת (3-4 משפטים): מה עולה מהתוכנית והשלכותיו התכנוניות, עם סייג שלא ניתן להסיק רמות הורמונליות מתוכנית.",
+  "recommendations": ["המלצה מעשית 1", "המלצה 2", "המלצה 3"],
   "confidence": "high" | "medium" | "low"
 }
 
-כללי מפתח:
-- מערך "parameters" חייב לכלול בדיוק את 8 המפתחות הבאים, בסדר הזה:
-${paramList}
-- כל שדות הטקסט בעברית, תמציתיים — הדוח כולו נועד להתאים לעמוד A4 יחיד.
-- "overallScore" הוא הממוצע המשוקלל של הפרמטרים, מעוגל.
-- verdict: certified אם overallScore ≥ 75, conditional אם 50-74, אחרת not_certified.
-- 2-4 המלצות ממוקדות ומעשיות בלבד.
-- היה מדויק וביקורתי; אל תנפח ציונים.`;
+מערך parameters חייב לכלול בדיוק את 7 המפתחות הבאים, בסדר זה:
+${paramSpec}
+
+כל שדות הטקסט בעברית ותמציתיים — הדוח נועד לעמוד A4 יחיד. אל תחשב ציון כולל; הוא יחושב בקוד מהמשקלים.`;
 }
 
 function userPrompt(buildingType) {
-  return `סוג המבנה שהוגדר על ידי המשתמש: ${buildingType || "לא צוין"}.
-נתח את השרטוט המצורף והפק את דוח ה-JSON לפי המבנה שהוגדר. אם השרטוט אינו קריא או אינו תוכנית אדריכלית, ציין זאת ב-planSummary והחזר ציונים נמוכים עם confidence="low".`;
+  return `סוג המבנה שהוגדר: ${buildingType || "לא צוין"}.
+נתח את השרטוט המצורף והחזר את דוח ה-JSON לפי המבנה. אם אינו תוכנית אדריכלית קריאה — ציין זאת ב-planType/observations, קבע readability="low" והחזר ציונים נמוכים עם confidence="low".`;
 }
 
-// Pull the first balanced JSON object out of a text response.
 function extractJson(text) {
   const start = text.indexOf("{");
   const end = text.lastIndexOf("}");
-  if (start === -1 || end === -1 || end < start) {
-    throw new Error("המודל לא החזיר JSON תקין. נסי שוב.");
-  }
-  const slice = text.slice(start, end + 1);
+  if (start === -1 || end === -1 || end < start) throw new Error("המודל לא החזיר JSON תקין. נסי שוב.");
   let parsed;
-  try {
-    parsed = JSON.parse(slice);
-  } catch {
-    throw new Error("שגיאה בפענוח תשובת המודל (JSON לא תקין). נסי שוב.");
-  }
-  if (!parsed || !Array.isArray(parsed.parameters)) {
-    throw new Error("תשובת המודל חסרה שדות נדרשים. נסי שוב.");
-  }
+  try { parsed = JSON.parse(text.slice(start, end + 1)); }
+  catch { throw new Error("שגיאה בפענוח תשובת המודל (JSON לא תקין). נסי שוב."); }
+  if (!parsed || !Array.isArray(parsed.parameters)) throw new Error("תשובת המודל חסרה שדות נדרשים. נסי שוב.");
   return parsed;
+}
+
+// Compute the overall BCDA score from fixed weights (reproducible & explainable).
+function computeScore(parameters) {
+  const byKey = Object.fromEntries((parameters || []).map((p) => [p.key, p]));
+  let sum = 0, wsum = 0;
+  const enriched = PARAMETERS.map((def) => {
+    const got = byKey[def.key] || {};
+    const score = Math.max(0, Math.min(100, Number(got.score) ?? 50));
+    sum += score * def.weight;
+    wsum += def.weight;
+    return {
+      key: def.key, name: def.name, weight: def.weight,
+      score, confidence: got.confidence || "low",
+      finding: got.finding || "לא זוהה מידע מספיק בתוכנית.",
+      inferable: def.inferable, source: def.source,
+    };
+  });
+  const overall = Math.round(sum / (wsum || 100));
+  const band = overall >= 72 ? "supportive" : overall >= 55 ? "partial" : "needs_improvement";
+  const bandLabel = band === "supportive" ? "תכנון תומך" : band === "partial" ? "תומך חלקית" : "דורש שיפור";
+  return { overall, band, bandLabel, enriched };
 }
 
 function friendlyError(status, bodyText) {
   let msg = bodyText;
-  try {
-    const j = JSON.parse(bodyText);
-    msg = j?.error?.message || bodyText;
-  } catch {
-    /* keep raw text */
-  }
+  try { msg = JSON.parse(bodyText)?.error?.message || bodyText; } catch { /* keep raw */ }
   if (status === 401) return "מפתח API לא תקין. בדקי את המפתח ונסי שוב.";
   if (status === 400 && /credit|billing|balance/i.test(msg)) return "אין יתרת שימוש בחשבון ה-API. הוסיפי קרדיט ב-console.anthropic.com.";
   if (status === 429) return "חריגה ממגבלת קצב. המתיני רגע ונסי שוב.";
@@ -99,15 +138,6 @@ function friendlyError(status, bodyText) {
   return `שגיאת API (${status}): ${msg}`;
 }
 
-/**
- * @param {object} o
- * @param {string} o.apiKey
- * @param {string} o.model
- * @param {string} o.base64      base64 data WITHOUT the data: prefix
- * @param {string} o.mediaType   e.g. "image/png" or "application/pdf"
- * @param {string} o.buildingType
- * @param {AbortSignal} [o.signal]
- */
 export async function analyzeBlueprint({ apiKey, model, base64, mediaType, buildingType, signal }) {
   const isPdf = mediaType === "application/pdf";
   const fileBlock = isPdf
@@ -119,9 +149,7 @@ export async function analyzeBlueprint({ apiKey, model, base64, mediaType, build
     max_tokens: 12000,
     output_config: { effort: "medium" },
     system: systemPrompt(),
-    messages: [
-      { role: "user", content: [fileBlock, { type: "text", text: userPrompt(buildingType) }] },
-    ],
+    messages: [{ role: "user", content: [fileBlock, { type: "text", text: userPrompt(buildingType) }] }],
   };
 
   const res = await fetch(ANTHROPIC_URL, {
@@ -142,16 +170,22 @@ export async function analyzeBlueprint({ apiKey, model, base64, mediaType, build
   }
 
   const data = await res.json();
-  if (data.stop_reason === "refusal") {
-    throw new Error("הבקשה נדחתה על ידי מסנני הבטיחות של המודל.");
-  }
-  const text = (data.content || [])
-    .filter((b) => b.type === "text")
-    .map((b) => b.text)
-    .join("\n")
-    .trim();
+  if (data.stop_reason === "refusal") throw new Error("הבקשה נדחתה על ידי מסנני הבטיחות של המודל.");
+  const text = (data.content || []).filter((b) => b.type === "text").map((b) => b.text).join("\n").trim();
 
-  const report = extractJson(text);
-  report._meta = { model, usage: data.usage || null };
-  return report;
+  const raw = extractJson(text);
+  const { overall, band, bandLabel, enriched } = computeScore(raw.parameters);
+
+  return {
+    planType: raw.planType || "",
+    readability: raw.readability || "medium",
+    observations: raw.observations || {},
+    parameters: enriched,
+    overallScore: overall,
+    band, bandLabel,
+    interpretation: raw.interpretation || "",
+    recommendations: Array.isArray(raw.recommendations) ? raw.recommendations : [],
+    confidence: raw.confidence || "medium",
+    _meta: { model, usage: data.usage || null },
+  };
 }

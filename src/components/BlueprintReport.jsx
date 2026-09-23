@@ -1,32 +1,37 @@
 import { createPortal } from "react-dom";
-import { Printer, X, CheckCircle2, AlertTriangle, MinusCircle } from "lucide-react";
-import { PARAMETERS } from "../lib/analyzeBlueprint";
+import { Printer, X } from "lucide-react";
 
-const nameByKey = Object.fromEntries(PARAMETERS.map((p) => [p.key, p.name]));
-
-const VERDICT = {
-  certified: { label: "עומד בתקן", color: "var(--bio)", Icon: CheckCircle2 },
-  conditional: { label: "עומד בתנאים", color: "var(--stress)", Icon: AlertTriangle },
-  not_certified: { label: "לא עומד בתקן", color: "var(--stress)", Icon: AlertTriangle },
+const BAND = {
+  supportive: { color: "var(--bio)" },
+  partial: { color: "var(--stress)" },
+  needs_improvement: { color: "var(--stress)" },
 };
 
-const IMPACT = {
-  positive: { color: "var(--bio)", Icon: CheckCircle2 },
-  neutral: { color: "var(--muted-foreground)", Icon: MinusCircle },
-  negative: { color: "var(--stress)", Icon: AlertTriangle },
+const CONF = {
+  high: { color: "var(--bio)", label: "ודאות גבוהה" },
+  medium: { color: "var(--stress)", label: "ודאות בינונית" },
+  low: { color: "var(--muted-foreground)", label: "ודאות נמוכה" },
 };
 
-const CONFIDENCE = { high: "ודאות גבוהה", medium: "ודאות בינונית", low: "ודאות נמוכה" };
+const OBS_ROWS = [
+  ["rooms", "חדרים/אזורים"],
+  ["openings", "פתחים וחזיתות"],
+  ["orientation", "סימון צפון"],
+  ["scale", "קנה מידה"],
+  ["core", "ליבה פנימית"],
+  ["ventilation", "אוורור"],
+  ["greenery", "צמחייה/חצר"],
+];
 
-function hsl(v) {
-  return `hsl(${v})`;
-}
+const hsl = (v) => `hsl(${v})`;
 
 export default function BlueprintReport({ report, imageUrl, buildingType, onClose }) {
-  const verdict = VERDICT[report.verdict] || VERDICT.conditional;
+  const band = BAND[report.band] || BAND.partial;
   const today = new Date().toLocaleDateString("he-IL", { year: "numeric", month: "long", day: "numeric" });
   const params = Array.isArray(report.parameters) ? report.parameters : [];
+  const obs = report.observations || {};
   const model = report?._meta?.model || "";
+  const conf = CONF[report.confidence] || CONF.medium;
 
   return createPortal(
     <div
@@ -35,16 +40,10 @@ export default function BlueprintReport({ report, imageUrl, buildingType, onClos
     >
       {/* Toolbar (not printed) */}
       <div className="report-toolbar w-full max-w-[210mm] flex items-center justify-between mb-4">
-        <button
-          onClick={() => window.print()}
-          className="inline-flex items-center gap-2 bg-foreground text-background font-heebo font-medium px-5 py-2.5 text-sm hover:bg-foreground/85 transition-colors"
-        >
+        <button onClick={() => window.print()} className="inline-flex items-center gap-2 bg-foreground text-background font-heebo font-medium px-5 py-2.5 text-sm hover:bg-foreground/85 transition-colors">
           <Printer className="w-4 h-4" strokeWidth={2} /> הדפס / שמור כ‑PDF
         </button>
-        <button
-          onClick={onClose}
-          className="inline-flex items-center gap-2 border border-background/40 text-background font-heebo px-4 py-2.5 text-sm hover:bg-background/10 transition-colors"
-        >
+        <button onClick={onClose} className="inline-flex items-center gap-2 border border-background/40 text-background font-heebo px-4 py-2.5 text-sm hover:bg-background/10 transition-colors">
           <X className="w-4 h-4" strokeWidth={2} /> סגור
         </button>
       </div>
@@ -52,81 +51,84 @@ export default function BlueprintReport({ report, imageUrl, buildingType, onClos
       {/* A4 sheet */}
       <div className="a4-sheet bg-white text-[#1c3028] shadow-2xl" style={{ fontFamily: "var(--font-heebo)" }}>
         {/* Header */}
-        <header className="flex items-start justify-between border-b-2 pb-4 mb-4" style={{ borderColor: hsl("var(--bio)") }}>
+        <header className="flex items-start justify-between border-b-2 pb-3 mb-3" style={{ borderColor: hsl("var(--bio)") }}>
           <div>
-            <div className="flex items-center gap-2 mb-1">
-              <span className="text-[8px] tracking-[0.3em] uppercase" style={{ color: hsl("var(--bio)") }}>
-                Architectural Endocrinology Standard
-              </span>
-            </div>
-            <h1 className="font-frank text-2xl font-bold leading-tight" style={{ fontFamily: "var(--font-frank)" }}>
-              תעודת ביופרופיל הורמונלי
+            <span className="text-[8px] tracking-[0.28em] uppercase" style={{ color: hsl("var(--bio)") }}>
+              BioSpace · הערכת סינון תכנונית מבוססת-מחקר
+            </span>
+            <h1 className="font-frank text-2xl font-bold leading-tight mt-0.5" style={{ fontFamily: "var(--font-frank)" }}>
+              מדד תכנון ביופילי וצירקדי
             </h1>
-            <p className="text-[11px] text-[#5b6b62] mt-0.5">ניתוח שרטוט אדריכלי · BioSpace</p>
+            <p className="text-[10px] text-[#5b6b62] mt-0.5">Biophilic &amp; Circadian Design Assessment (BCDA)</p>
           </div>
-          <div className="text-left text-[10px] text-[#5b6b62] leading-5">
+          <div className="text-left text-[9px] text-[#5b6b62] leading-5">
             <div>תאריך: <span className="text-[#1c3028] font-medium">{today}</span></div>
             <div>סוג מבנה: <span className="text-[#1c3028] font-medium">{buildingType || "—"}</span></div>
-            <div>{CONFIDENCE[report.confidence] || ""}</div>
+            <div>{conf.label}</div>
           </div>
         </header>
 
-        {/* Body: two columns */}
-        <div className="grid grid-cols-[34%_1fr] gap-5">
-          {/* Left column */}
+        {/* Body */}
+        <div className="grid grid-cols-[36%_1fr] gap-4">
+          {/* Left */}
           <div className="flex flex-col gap-3">
             {imageUrl && (
               <div className="border border-[#d8e0d8] p-1">
-                <img src={imageUrl} alt="שרטוט שנותח" className="w-full h-auto max-h-[62mm] object-contain" />
+                <img src={imageUrl} alt="שרטוט שנותח" className="w-full h-auto max-h-[50mm] object-contain" />
               </div>
             )}
 
-            {/* Overall score + verdict */}
-            <div className="border border-[#d8e0d8] p-3 text-center">
-              <p className="text-[9px] tracking-[0.25em] uppercase text-[#5b6b62] mb-1">Endocrine Balance</p>
-              <div className="font-frank text-5xl font-bold leading-none" style={{ fontFamily: "var(--font-frank)", color: hsl("var(--bio)") }}>
-                {report.overallScore}
-                <span className="text-lg text-[#9aa79f]"> / 100</span>
+            {/* Score */}
+            <div className="border border-[#d8e0d8] p-2.5 text-center">
+              <p className="text-[8px] tracking-[0.22em] uppercase text-[#5b6b62] mb-0.5">BCDA · ציון כולל</p>
+              <div className="font-frank text-4xl font-bold leading-none" style={{ fontFamily: "var(--font-frank)", color: hsl(band.color) }}>
+                {report.overallScore}<span className="text-base text-[#9aa79f]"> / 100</span>
               </div>
-              <div
-                className="inline-flex items-center gap-1.5 mt-3 px-3 py-1 text-[11px] font-medium"
-                style={{ color: hsl(verdict.color), border: `1px solid ${hsl(verdict.color)}` }}
-              >
-                <verdict.Icon className="w-3.5 h-3.5" strokeWidth={2} />
-                {report.verdictLabel || verdict.label}
+              <div className="inline-flex items-center gap-1 mt-2 px-2.5 py-0.5 text-[10px] font-medium" style={{ color: hsl(band.color), border: `1px solid ${hsl(band.color)}` }}>
+                {report.bandLabel}
               </div>
+              <p className="text-[8px] text-[#9aa79f] mt-1.5 leading-3">ממוצע משוקלל של 7 פרמטרים תכנוניים</p>
             </div>
 
-            {/* HPA impact */}
-            {report.hpaImpact && (
-              <div className="border-r-2 pr-3 text-[11px] leading-6 text-[#3a4a42]" style={{ borderColor: hsl("var(--bio)") }}>
-                <span className="block text-[9px] tracking-[0.2em] uppercase text-[#5b6b62] mb-1">HPA / Cortisol</span>
-                {report.hpaImpact}
-              </div>
-            )}
+            {/* Observations — proof the plan was read */}
+            <div className="border-r-2 pr-2.5" style={{ borderColor: hsl("var(--bio)") }}>
+              <p className="text-[8px] tracking-[0.2em] uppercase text-[#5b6b62] mb-1.5">מה השרטוט מראה</p>
+              <dl className="space-y-1">
+                {OBS_ROWS.map(([k, label]) => (
+                  <div key={k} className="text-[9.5px] leading-4">
+                    <dt className="font-medium text-[#3a4a42] inline">{label}: </dt>
+                    <dd className="inline text-[#5b6b62]">{obs[k] || "לא צוין בתוכנית"}</dd>
+                  </div>
+                ))}
+              </dl>
+            </div>
           </div>
 
-          {/* Right column: parameters */}
+          {/* Right: parameters */}
           <div>
-            <p className="text-[9px] tracking-[0.25em] uppercase text-[#5b6b62] mb-2">פרמטרי בדיקה</p>
+            <div className="flex items-center justify-between mb-2">
+              <p className="text-[8px] tracking-[0.22em] uppercase text-[#5b6b62]">פרמטרי הערכה</p>
+              <p className="text-[8px] text-[#9aa79f]">משקל · ציון · ודאות</p>
+            </div>
             <div className="divide-y divide-[#e4ece4]">
               {params.map((p) => {
-                const imp = IMPACT[p.impact] || IMPACT.neutral;
+                const c = CONF[p.confidence] || CONF.low;
                 return (
                   <div key={p.key} className="py-1.5">
                     <div className="flex items-center justify-between gap-2 mb-1">
-                      <span className="text-[11px] font-medium flex items-center gap-1.5">
-                        <imp.Icon className="w-3 h-3" strokeWidth={2} style={{ color: hsl(imp.color) }} />
-                        {nameByKey[p.key] || p.key}
+                      <span className="text-[10.5px] font-medium text-[#1c3028]">
+                        {p.name}
+                        <span className="text-[8px] text-[#9aa79f] font-normal"> · {p.weight}%</span>
                       </span>
-                      <span className="font-frank text-[12px] font-bold tabular-nums" style={{ fontFamily: "var(--font-frank)", color: hsl(imp.color) }}>
-                        {p.score}
+                      <span className="flex items-center gap-1.5">
+                        <span className="w-1.5 h-1.5 rounded-full" style={{ background: hsl(c.color) }} title={c.label} />
+                        <span className="font-frank text-[12px] font-bold tabular-nums" style={{ fontFamily: "var(--font-frank)", color: hsl(band.color) }}>{p.score}</span>
                       </span>
                     </div>
                     <div className="h-1 w-full bg-[#e4ece4] overflow-hidden mb-1">
-                      <div className="h-full" style={{ width: `${Math.max(0, Math.min(100, p.score))}%`, background: hsl(imp.color) }} />
+                      <div className="h-full" style={{ width: `${p.score}%`, background: hsl(band.color) }} />
                     </div>
-                    <p className="text-[10px] leading-4 text-[#5b6b62]">{p.finding}</p>
+                    <p className="text-[9.5px] leading-4 text-[#5b6b62]">{p.finding}</p>
                   </div>
                 );
               })}
@@ -134,40 +136,47 @@ export default function BlueprintReport({ report, imageUrl, buildingType, onClos
           </div>
         </div>
 
-        {/* Plan summary */}
-        {report.planSummary && (
-          <p className="text-[10px] text-[#5b6b62] italic mt-4 border-t border-[#e4ece4] pt-3">
-            תיאור השרטוט: {report.planSummary}
-          </p>
+        {/* Plan summary + interpretation */}
+        {report.planType && (
+          <p className="text-[9px] text-[#5b6b62] italic mt-3 border-t border-[#e4ece4] pt-2">שרטוט שזוהה: {report.planType}</p>
         )}
-
-        {/* Interpretation */}
         {report.interpretation && (
-          <section className="mt-3">
-            <h2 className="font-frank text-sm font-bold mb-1" style={{ fontFamily: "var(--font-frank)" }}>פרשנות פיזיולוגית</h2>
-            <p className="text-[11px] leading-6 text-[#3a4a42]">{report.interpretation}</p>
+          <section className="mt-2">
+            <h2 className="font-frank text-[13px] font-bold mb-1" style={{ fontFamily: "var(--font-frank)" }}>פרשנות תכנונית (זהירה)</h2>
+            <p className="text-[10.5px] leading-5 text-[#3a4a42]">{report.interpretation}</p>
           </section>
         )}
 
         {/* Recommendations */}
-        {Array.isArray(report.recommendations) && report.recommendations.length > 0 && (
-          <section className="mt-3">
-            <h2 className="font-frank text-sm font-bold mb-1" style={{ fontFamily: "var(--font-frank)" }}>המלצות</h2>
-            <ul className="space-y-1">
+        {report.recommendations.length > 0 && (
+          <section className="mt-2">
+            <h2 className="font-frank text-[13px] font-bold mb-1" style={{ fontFamily: "var(--font-frank)" }}>המלצות תכנוניות</h2>
+            <ul className="grid grid-cols-2 gap-x-4 gap-y-0.5">
               {report.recommendations.map((r, i) => (
-                <li key={i} className="text-[11px] leading-5 text-[#3a4a42] flex gap-2">
-                  <span style={{ color: hsl("var(--bio)") }}>▪</span>
-                  <span>{r}</span>
+                <li key={i} className="text-[10px] leading-4 text-[#3a4a42] flex gap-1.5">
+                  <span style={{ color: hsl("var(--bio)") }}>▪</span><span>{r}</span>
                 </li>
               ))}
             </ul>
           </section>
         )}
 
+        {/* Methodology + disclaimer */}
+        <section className="mt-3 pt-2 border-t border-[#e4ece4]">
+          <p className="text-[8.5px] leading-4 text-[#5b6b62]">
+            <span className="font-medium text-[#3a4a42]">מתודולוגיה:</span> הציון הוא ממוצע משוקלל של 7 פרמטרים (משקלים מוצגים), המדורגים 0–100 על סמך מה שניתן להסיק מתוכנית בלבד.
+            זהו <span className="font-medium">כלי סינון תכנוני מבוסס-מחקר</span> — <span className="font-medium">אינו מדידה פיזיולוגית/הורמונלית</span>, אינו קובע רמות קורטיזול, ואינו תחליף לחוות דעת מקצועית.
+            חשיפה לאור מזוהה עם סנכרון המערכת הצירקדית, אך לא ניתן להסיק תגובה הורמונלית מתוכנית.
+          </p>
+          <p className="text-[8px] text-[#9aa79f] mt-1">
+            מקורות: WHO Housing &amp; Health · CIE Integrative Lighting (melanopic EDI) · Ulrich (views to nature) · EN 17037 (daylight).
+          </p>
+        </section>
+
         {/* Footer */}
-        <footer className="mt-5 pt-3 border-t border-[#e4ece4] flex items-center justify-between text-[8px] text-[#9aa79f]">
-          <span>הופק על ידי BioSpace · ניתוח אוטומטי ({model}). אינו תחליף לחוות דעת מקצועית.</span>
-          <span>BioSpace — Architectural Endocrinology</span>
+        <footer className="mt-3 pt-2 border-t border-[#e4ece4] flex items-center justify-between text-[8px] text-[#9aa79f]">
+          <span>הופק על ידי BioSpace · ניתוח אוטומטי ({model}).</span>
+          <span>BioSpace — Biophilic &amp; Circadian Design</span>
         </footer>
       </div>
     </div>,

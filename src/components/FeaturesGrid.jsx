@@ -1,10 +1,9 @@
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  AlertTriangle, Leaf, Zap, HeartPulse, ArrowUp,
+  AlertTriangle, Leaf, HeartPulse, ArrowUp,
   Check, Upload, FileCheck, ScanLine,
 } from "lucide-react";
-import FeatureCard from "./FeatureCard";
 import RadialGauge from "./charts/RadialGauge";
 import ExposureChart from "./charts/ExposureChart";
 import ComparisonBars from "./charts/ComparisonBars";
@@ -33,7 +32,7 @@ const SCAN_RESULTS = [
   },
 ];
 
-function ScannerCard() {
+export function ScannerCard() {
   const [state, setState] = useState("idle");
   const [result, setResult] = useState(null);
   const [dots, setDots] = useState("");
@@ -130,7 +129,7 @@ function AnimatedNumber({ value, decimals = 0 }) {
   return <span>{display}</span>;
 }
 
-function CompassCard() {
+export function CompassCard() {
   const [env, setEnv] = useState("corridor");
   const data = ENV_DATA[env];
 
@@ -212,7 +211,7 @@ const RECOVERY_PHASES = [
   { at: 0,   text: "✓ החלמה הושלמה. הגוף מאוזן." },
 ];
 
-function TimerCard() {
+export function TimerCard() {
   const [seconds, setSeconds] = useState(240);
   const [running, setRunning] = useState(false);
   const [done, setDone] = useState(false);
@@ -278,7 +277,7 @@ function TimerCard() {
 }
 
 // ─── 4. ROI Calculator ─────────────────────────────────────────────────────
-function ROICard() {
+export function ROICard() {
   const [employees, setEmployees] = useState(100);
   const [result, setResult] = useState(null);
 
@@ -349,7 +348,7 @@ const DEMO_DATA = {
   female: { label: "אישה", cortisol: 74, bar: "bg-stress",    desc: "נשים מציגות תגובת HPA מוגברת משמעותית באותה סביבה." },
 };
 
-function DemographicCard() {
+export function DemographicCard() {
   const [gender, setGender] = useState("male");
   const data = DEMO_DATA[gender];
 
@@ -445,7 +444,7 @@ const INTEGRITY = {
   windowless: [52, 45, 37, 29, 21, 12, 4],
 };
 
-function BrainTimelineCard() {
+export function BrainTimelineCard() {
   const [sliderVal, setSliderVal] = useState(0);
   const [envType, setEnvType] = useState("biophilic");
 
@@ -552,7 +551,7 @@ const BUILDING_TYPES = [
   { value: "residential", label: "מגורים" },
 ];
 
-function BlueprintCard() {
+export function BlueprintCard() {
   const [buildingType, setBuildingType] = useState("hospital");
   const [dragging, setDragging] = useState(false);
   const [fileName, setFileName] = useState(null);
@@ -714,74 +713,5 @@ function BlueprintCard() {
   );
 }
 
-// ─── Section divider helper ──────────────────────────────────────────────────
-function SectionDivider({ label, sub }) {
-  return (
-    <div className="max-w-6xl mx-auto my-24 md:my-32 px-8 md:px-20">
-      <div className="border-t border-border pt-10 flex items-end justify-between">
-        <div>
-          <p className="text-[9px] tracking-[0.4em] text-muted-foreground/40 font-heebo uppercase mb-1">{sub}</p>
-          <h3 className="font-frank text-xl md:text-2xl font-bold text-foreground">{label}</h3>
-        </div>
-        <div className="w-2 h-2 bg-border" />
-      </div>
-    </div>
-  );
-}
-
-// ─── Layout ─────────────────────────────────────────────────────────────────
-export default function FeaturesGrid() {
-  return (
-    <section className="relative border-t border-border" dir="rtl">
-
-      {/* ── Core tools ── */}
-      <div className="py-24 md:py-36 px-8 md:px-20">
-        <div className="max-w-6xl mx-auto mb-16">
-          <div className="flex items-center gap-3 mb-5">
-            <div className="w-6 h-px bg-accent" />
-            <span className="text-[10px] tracking-[0.35em] text-muted-foreground/60 font-heebo uppercase">Research Tools</span>
-          </div>
-          <h2 className="font-frank text-3xl md:text-4xl font-bold text-foreground leading-tight">
-            כלי מחקר<br />
-            <span className="font-light">ואבחון סביבתי</span>
-          </h2>
-        </div>
-
-        <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-px bg-border">
-          <div className="bg-background"><ScannerCard /></div>
-          <div className="bg-background"><CompassCard /></div>
-          <div className="bg-background"><TimerCard /></div>
-          <div className="bg-background">
-            <FeatureCard
-              icon={Zap}
-              title="אתגר השעה"
-              description='שאל את עצמך: ״מה החדר הזה אומר לגוף שלי?״ — משימות יומיות שמחדדות את המודעות הסביבתית שלך.'
-              index={3}
-            />
-          </div>
-        </div>
-      </div>
-
-      <SectionDivider label="מודולים מתקדמים" sub="Advanced Modules" />
-
-      {/* ── Advanced modules ── */}
-      <div className="px-8 md:px-20 pb-24 md:pb-36">
-        <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-px bg-border">
-          <div className="bg-background"><ROICard /></div>
-          <div className="bg-background"><DemographicCard /></div>
-          <div className="bg-background col-span-1 md:col-span-2"><BrainTimelineCard /></div>
-        </div>
-      </div>
-
-      <SectionDivider label="הגבול הבא" sub="The Next Frontier" />
-
-      {/* ── Blueprint ── */}
-      <div className="px-8 md:px-20 pb-24 md:pb-36">
-        <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-px bg-border">
-          <div className="bg-background col-span-1 md:col-span-2"><BlueprintCard /></div>
-        </div>
-      </div>
-
-    </section>
-  );
-}
+// Individual module cards are exported above and composed into the conceptual
+// narrative (acts) in src/pages/Home.jsx via StorySection.

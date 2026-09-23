@@ -33,7 +33,7 @@ export default function HeroSection() {
   }, [reduce]);
 
   return (
-    <section ref={sectionRef} className="relative min-h-screen flex flex-col justify-center overflow-hidden" dir="rtl">
+    <section id="thesis" ref={sectionRef} className="relative min-h-screen flex flex-col justify-center overflow-hidden" dir="rtl">
 
       {/* ── Warm paper background ── */}
       <div className="absolute inset-0 bg-background" />
